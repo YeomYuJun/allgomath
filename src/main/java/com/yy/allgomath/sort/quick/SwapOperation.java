@@ -1,6 +1,6 @@
 package com.yy.allgomath.sort.quick;
 
-public class SwapOperation {\
+public class SwapOperation {
     private int step;           // 전체 단계 번호
     private int partitionStep;  // 파티션 내 단계 번호
     private int fromIndex;      // 출발 인덱스

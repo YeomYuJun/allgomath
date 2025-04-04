@@ -1,5 +1,7 @@
 package com.yy.allgomath.sort.service;
 
+import com.yy.allgomath.common.constants.AlgorithmConstants;
+import com.yy.allgomath.sort.algorithm.MergeSort;
 import com.yy.allgomath.sort.algorithm.QuickSort;
 import com.yy.allgomath.sort.model.SortRequest;
 import com.yy.allgomath.sort.model.SortResult;
@@ -22,22 +24,23 @@ public class SortService {
     public SortResult performSort(SortRequest request) {
         String algorithm = request.getAlgorithm();
         
-        // 현재는 퀵 정렬만 지원
-        if (!"quick".equals(algorithm)) {
+        // 알고리즘에 따른 정렬 수행
+        if (AlgorithmConstants.SORT_ALGORITHM_QUICK.equals(algorithm)) {
+            return performQuickSort(request);
+        } else if (AlgorithmConstants.SORT_ALGORITHM_MERGE.equals(algorithm)) {
+            return performMergeSort(request);
+        } else {
             throw new IllegalArgumentException("지원하지 않는 정렬 알고리즘입니다: " + algorithm);
         }
-        
-        return performQuickSort(request);
     }
     
     /**
-     * 퀵 정렬을 수행합니다.
+     * 요청에 따라 정렬할 배열을 생성합니다.
      * 
      * @param request 정렬 요청 정보
-     * @return 정렬 결과
+     * @return 생성된 TrackingElement 배열
      */
-    public SortResult performQuickSort(SortRequest request) {
-        // 요청에 따라 배열 생성
+    private TrackingElement[] createArray(SortRequest request) {
         TrackingElement[] arr;
 
         if (request.hasCustomValues()) {
@@ -62,6 +65,19 @@ public class SortService {
                 arr[i] = new TrackingElement(value, i + 1);
             }
         }
+        
+        return arr;
+    }
+    
+    /**
+     * 퀵 정렬을 수행합니다.
+     * 
+     * @param request 정렬 요청 정보
+     * @return 정렬 결과
+     */
+    public SortResult performQuickSort(SortRequest request) {
+        // 배열 생성
+        TrackingElement[] arr = createArray(request);
 
         // 정렬 수행
         QuickSort quickSort = new QuickSort();
@@ -69,6 +85,25 @@ public class SortService {
         quickSort.sort(arr, 0, arr.length - 1);
 
         // 결과 반환
-        return new SortResult(arr, quickSort.getSwapLog(), quickSort.getGlobalStep() - 1, "quick");
+        return new SortResult(arr, quickSort.getSwapLog(), quickSort.getGlobalStep() - 1, AlgorithmConstants.SORT_ALGORITHM_QUICK);
+    }
+    
+    /**
+     * 합병 정렬을 수행합니다.
+     * 
+     * @param request 정렬 요청 정보
+     * @return 정렬 결과
+     */
+    public SortResult performMergeSort(SortRequest request) {
+        // 배열 생성
+        TrackingElement[] arr = createArray(request);
+
+        // 정렬 수행
+        MergeSort mergeSort = new MergeSort();
+        TrackingElement[] originalArray = Arrays.copyOf(arr, arr.length);
+        mergeSort.sort(arr);
+
+        // 결과 반환
+        return new SortResult(arr, mergeSort.getMergeLog(), mergeSort.getGlobalStep() - 1, AlgorithmConstants.SORT_ALGORITHM_MERGE);
     }
 }

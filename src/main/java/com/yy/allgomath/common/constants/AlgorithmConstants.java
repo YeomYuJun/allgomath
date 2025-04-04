@@ -6,6 +6,7 @@ package com.yy.allgomath.common.constants;
 public final class AlgorithmConstants {
     // 정렬 알고리즘 타입
     public static final String SORT_ALGORITHM_QUICK = "quick";
+    public static final String SORT_ALGORITHM_MERGE = "merge";
     
     // 함수 타입
     public static final String FUNCTION_TYPE_STANDARD = "standard";

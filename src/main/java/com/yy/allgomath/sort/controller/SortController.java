@@ -1,5 +1,6 @@
 package com.yy.allgomath.sort.controller;
 
+import com.yy.allgomath.common.constants.AlgorithmConstants;
 import com.yy.allgomath.sort.model.SortRequest;
 import com.yy.allgomath.sort.model.SortResult;
 import com.yy.allgomath.sort.service.SortService;
@@ -28,7 +29,10 @@ public class SortController {
     @GetMapping
     public ResponseEntity<Map<String, Object>> getSupportedAlgorithms() {
         Map<String, Object> response = new HashMap<>();
-        response.put("algorithms", Arrays.asList("quick"));
+        response.put("algorithms", Arrays.asList(
+            AlgorithmConstants.SORT_ALGORITHM_QUICK, 
+            AlgorithmConstants.SORT_ALGORITHM_MERGE
+        ));
         response.put("status", "success");
         return ResponseEntity.ok(response);
     }
@@ -54,7 +58,21 @@ public class SortController {
     @PostMapping("/quick")
     public ResponseEntity<SortResult> quickSort(@RequestBody SortRequest request) {
         // 알고리즘 타입을 퀵 정렬로 설정
-        request.setAlgorithm("quick");
+        request.setAlgorithm(AlgorithmConstants.SORT_ALGORITHM_QUICK);
+        SortResult result = sortService.performSort(request);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 합병 정렬 요청을 처리합니다.
+     * 
+     * @param request 정렬 요청 정보
+     * @return 정렬 결과
+     */
+    @PostMapping("/merge")
+    public ResponseEntity<SortResult> mergeSort(@RequestBody SortRequest request) {
+        // 알고리즘 타입을 합병 정렬로 설정
+        request.setAlgorithm(AlgorithmConstants.SORT_ALGORITHM_MERGE);
         SortResult result = sortService.performSort(request);
         return ResponseEntity.ok(result);
     }
@@ -70,14 +88,14 @@ public class SortController {
         
         // 파라미터 검증
         if (size < 1) {
-            throw new IllegalArgumentException("배열 크기는 1 이상이어야 합니다.");
+            throw new IllegalArgumentException(AlgorithmConstants.ERROR_INVALID_ARRAY_SIZE);
         }
         if (minValue > maxValue) {
-            throw new IllegalArgumentException("최소값은 최대값보다 작거나 같아야 합니다.");
+            throw new IllegalArgumentException(AlgorithmConstants.ERROR_INVALID_VALUE_RANGE);
         }
 
         SortRequest request = new SortRequest(size, minValue, maxValue);
-        request.setAlgorithm("quick");
+        request.setAlgorithm(AlgorithmConstants.SORT_ALGORITHM_QUICK);
         SortResult result = sortService.performSort(request);
         return ResponseEntity.ok(result);
     }
@@ -89,11 +107,50 @@ public class SortController {
     public ResponseEntity<SortResult> legacyCustomArrayQuickSort(@RequestParam Integer[] values) {
         // 파라미터 검증
         if (values == null || values.length == 0) {
-            throw new IllegalArgumentException("배열은 비어있지 않아야 합니다.");
+            throw new IllegalArgumentException(AlgorithmConstants.ERROR_EMPTY_ARRAY);
         }
 
         SortRequest request = new SortRequest(values);
-        request.setAlgorithm("quick");
+        request.setAlgorithm(AlgorithmConstants.SORT_ALGORITHM_QUICK);
+        SortResult result = sortService.performSort(request);
+        return ResponseEntity.ok(result);
+    }
+    
+    /**
+     * 랜덤 배열 생성 및 합병 정렬 수행
+     */
+    @GetMapping("/merge/random")
+    public ResponseEntity<SortResult> randomMergeSort(
+            @RequestParam int size,
+            @RequestParam int minValue,
+            @RequestParam int maxValue) {
+        
+        // 파라미터 검증
+        if (size < 1) {
+            throw new IllegalArgumentException(AlgorithmConstants.ERROR_INVALID_ARRAY_SIZE);
+        }
+        if (minValue > maxValue) {
+            throw new IllegalArgumentException(AlgorithmConstants.ERROR_INVALID_VALUE_RANGE);
+        }
+
+        SortRequest request = new SortRequest(size, minValue, maxValue);
+        request.setAlgorithm(AlgorithmConstants.SORT_ALGORITHM_MERGE);
+        SortResult result = sortService.performSort(request);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 사용자 정의 배열로 합병 정렬 수행
+     */
+    @GetMapping("/merge/arr")
+    public ResponseEntity<SortResult> customArrayMergeSort(@RequestParam Integer[] values) {
+        // 파라미터 검증
+        if (values == null || values.length == 0) {
+            throw new IllegalArgumentException(AlgorithmConstants.ERROR_EMPTY_ARRAY);
+        }
+
+        SortRequest request = new SortRequest(values);
+        request.setAlgorithm(AlgorithmConstants.SORT_ALGORITHM_MERGE);
         SortResult result = sortService.performSort(request);
         return ResponseEntity.ok(result);
     }
