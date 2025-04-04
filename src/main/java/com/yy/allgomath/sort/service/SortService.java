@@ -1,6 +1,7 @@
 package com.yy.allgomath.sort.service;
 
 import com.yy.allgomath.common.constants.AlgorithmConstants;
+import com.yy.allgomath.sort.algorithm.HeapSort;
 import com.yy.allgomath.sort.algorithm.MergeSort;
 import com.yy.allgomath.sort.algorithm.QuickSort;
 import com.yy.allgomath.sort.model.SortRequest;
@@ -29,6 +30,8 @@ public class SortService {
             return performQuickSort(request);
         } else if (AlgorithmConstants.SORT_ALGORITHM_MERGE.equals(algorithm)) {
             return performMergeSort(request);
+        } else if (AlgorithmConstants.SORT_ALGORITHM_HEAP.equals(algorithm)) {
+            return performHeapSort(request);
         } else {
             throw new IllegalArgumentException("지원하지 않는 정렬 알고리즘입니다: " + algorithm);
         }
@@ -105,5 +108,24 @@ public class SortService {
 
         // 결과 반환
         return new SortResult(arr, mergeSort.getMergeLog(), mergeSort.getGlobalStep() - 1, AlgorithmConstants.SORT_ALGORITHM_MERGE);
+    }
+    
+    /**
+     * 힙 정렬을 수행합니다.
+     * 
+     * @param request 정렬 요청 정보
+     * @return 정렬 결과
+     */
+    public SortResult performHeapSort(SortRequest request) {
+        // 배열 생성
+        TrackingElement[] arr = createArray(request);
+
+        // 정렬 수행
+        HeapSort heapSort = new HeapSort();
+        TrackingElement[] originalArray = Arrays.copyOf(arr, arr.length);
+        heapSort.sort(arr);
+
+        // 결과 반환
+        return new SortResult(arr, heapSort.getSwapLog(), heapSort.getGlobalStep() - 1, AlgorithmConstants.SORT_ALGORITHM_HEAP);
     }
 }
