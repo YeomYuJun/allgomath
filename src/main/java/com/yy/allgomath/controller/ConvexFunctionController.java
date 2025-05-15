@@ -18,6 +18,15 @@ import java.util.HashMap;
 @RequestMapping("/api/convex")
 public class ConvexFunctionController {
 
+    /**
+     * @param xMin
+     * @param xMax
+     * @param yMin
+     * @param yMax
+     * @param resolution
+     * @param functionType
+     * @return
+     */
     @GetMapping("/surface")
     public ResponseEntity<List<Point3D>> getConvexFunctionData(
             @RequestParam(defaultValue = "-5", name = "xMin") double xMin,
@@ -45,7 +54,7 @@ public class ConvexFunctionController {
     }
 
     /**
-     * 경사 하강법을 사용하여 볼록 함수의 최소값을 찾습니다.
+     * 경사 하강법을 사용하여 볼록 함수의 최소값을 찾음.
      *
      * @param startX 시작 x 좌표
      * @param startY 시작 y 좌표
@@ -108,7 +117,7 @@ public class ConvexFunctionController {
     }
 
     /**
-     * 함수의 모든 변수에 대한 특성을 분석합니다.
+     * 함수의 모든 변수에 대한 특성을 분석.
      *
      * @param functionType 함수 타입
      * @return 함수 특성 정보 (최소값 위치, 헤시안 행렬 고유값 등)
@@ -140,7 +149,7 @@ public class ConvexFunctionController {
     }
 
     /**
-     * 함수 타입에 따른 z 값(높이)을 계산합니다.
+     * 함수 타입에 따른 z 값(높이)을 계산.
      *
      * @param x x 좌표
      * @param y y 좌표
@@ -171,7 +180,7 @@ public class ConvexFunctionController {
     }
 
     /**
-     * 함수의 그래디언트를 계산합니다.
+     * 함수의 그래디언트를 계산.
      *
      * @param x x 좌표
      * @param y y 좌표
@@ -214,7 +223,7 @@ public class ConvexFunctionController {
     }
 
     /**
-     * 함수의 이론적 최소값 위치를 계산합니다.
+     * 함수의 이론적 최소값 위치를 계산.
      *
      * @param functionType 함수 타입
      * @return [x_min, y_min, f(x_min,y_min)] 형태의 최소값 정보
@@ -267,7 +276,7 @@ public class ConvexFunctionController {
     }
 
     /**
-     * 함수의 차수를 반환합니다.
+     * 함수의 차수를 반환.
      */
     private int getFunctionDegree(String functionType) {
         switch (functionType) {
@@ -281,7 +290,7 @@ public class ConvexFunctionController {
     }
 
     /**
-     * 함수의 이름을 반환합니다.
+     * 함수의 이름을 반환.
      */
     private String getFunctionName(String functionType) {
         switch (functionType) {
@@ -295,7 +304,7 @@ public class ConvexFunctionController {
     }
 
     /**
-     * 함수의 수학적 표현식을 반환합니다.
+     * 함수의 수학적 표현식을 반환.
      */
     private String getFunctionFormula(String functionType) {
         switch (functionType) {

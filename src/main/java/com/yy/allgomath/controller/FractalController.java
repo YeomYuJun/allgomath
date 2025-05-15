@@ -18,6 +18,18 @@ public class FractalController {
         this.fractalService = fractalService;
     }
 
+    /**
+     * 주어진 범위, 해상도, 최대 반복 횟수를 이용하여 만델브로 집합을 계산하고 결과를 반환.
+     *
+     * @param xMin          실수부 최소값 (기본값: -2.0)
+     * @param xMax          실수부 최대값 (기본값: 1.0)
+     * @param yMin          허수부 최소값 (기본값: -1.5)
+     * @param yMax          허수부 최대값 (기본값: 1.5)
+     * @param width         결과 이미지의 너비 (기본값: 800)
+     * @param height        결과 이미지의 높이 (기본값: 600)
+     * @param maxIterations 각 점에 대한 최대 반복 횟수 (기본값: 100)
+     * @return ResponseEntity<FractalResult> 계산된 만델브로 집합 데이터와 HTTP 상태 코드를 담은 응답
+     */
     @GetMapping("/mandelbrot")
     public ResponseEntity<FractalResult> getMandelbrotSet(
             @RequestParam(defaultValue = "-2.0", name = "xMin") double xMin,
@@ -33,6 +45,20 @@ public class FractalController {
                 xMin, xMax, yMin, yMax, width, height, maxIterations));
     }
 
+    /**
+     * 주어진 범위, 상수 c 값, 해상도, 최대 반복 횟수를 이용하여 줄리아 집합을 계산하고 결과를 반환.
+     *
+     * @param xMin          실수부 최소값 (기본값: -2.0)
+     * @param xMax          실수부 최대값 (기본값: 2.0)
+     * @param yMin          허수부 최소값 (기본값: -2.0)
+     * @param yMax          허수부 최대값 (기본값: 2.0)
+     * @param cReal         줄리아 집합 계산에 사용될 복소수 c의 실수부 (기본값: -0.7)
+     * @param cImag         줄리아 집합 계산에 사용될 복소수 c의 허수부 (기본값: 0.27015)
+     * @param width         결과 이미지의 너비 (기본값: 800)
+     * @param height        결과 이미지의 높이 (기본값: 600)
+     * @param maxIterations 각 점에 대한 최대 반복 횟수 (기본값: 100)
+     * @return ResponseEntity<FractalResult> 계산된 줄리아 집합 데이터와 HTTP 상태 코드를 담은 응답
+     */
     @GetMapping("/julia")
     public ResponseEntity<FractalResult> getJuliaSet(
             @RequestParam(defaultValue = "-2.0", name = "xMin") double xMin,

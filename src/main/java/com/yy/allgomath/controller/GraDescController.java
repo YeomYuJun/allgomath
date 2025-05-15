@@ -44,7 +44,7 @@ public class GraDescController {
         return ResponseEntity.ok(points);
     }
     /**
-     * 경사 하강법 경로를 계산합니다.
+     * 경사 하강법 경로를 계산.
      *
      * @param startX 시작 x 좌표
      * @param startY 시작 y 좌표
