@@ -1,9 +1,9 @@
 package com.yy.allgomath.controller;
 
 import com.yy.allgomath.common.constants.AlgorithmConstants;
-import com.yy.allgomath.sort.model.SortRequest;
-import com.yy.allgomath.sort.model.SortResult;
-import com.yy.allgomath.sort.service.SortService;
+import com.yy.allgomath.datatype.SortRequest;
+import com.yy.allgomath.datatype.SortResult;
+import com.yy.allgomath.service.SortService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
