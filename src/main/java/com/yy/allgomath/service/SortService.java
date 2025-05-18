@@ -17,7 +17,10 @@ import java.util.Random;
 public class SortService {
     
     /**
-     * 정렬 요청을 처리합니다.
+     * 정렬 요청을 처리.
+     * 
+     * @param request 정렬 요청 데이터
+     * @return 정렬 결과
      */
     public SortResult performSort(SortRequest request) {
         String algorithm = request.getAlgorithm();
@@ -35,7 +38,10 @@ public class SortService {
     }
     
     /**
-     * 요청에 따라 정렬할 배열을 생성합니다.
+     * 요청에 따라 정렬할 배열.
+     * 
+     * @param request 정렬 요청 데이터
+     * @return 정렬할 배열
      */
     private TrackingElement[] createArray(SortRequest request) {
         TrackingElement[] arr;
@@ -67,7 +73,10 @@ public class SortService {
     }
     
     /**
-     * 퀵 정렬을 수행합니다.
+     * 퀵 정렬을 수행.
+     * 
+     * @param request 퀵 정렬 요청 데이터
+     * @return 퀵 정렬 결과
      */
     private SortResult performQuickSort(SortRequest request) {
         // 배열 생성
@@ -83,7 +92,10 @@ public class SortService {
     }
     
     /**
-     * 합병 정렬을 수행합니다.
+     * 합병 정렬을 수행.
+     * 
+     * @param request 합병 정렬 요청 데이터
+     * @return 합병 정렬 결과
      */
     private SortResult performMergeSort(SortRequest request) {
         // 배열 생성
@@ -99,7 +111,10 @@ public class SortService {
     }
     
     /**
-     * 힙 정렬을 수행합니다.
+     * 힙 정렬을 수행.
+     * 
+     * @param request 힙 정렬 요청 데이터
+     * @return 힙 정렬 결과
      */
     private SortResult performHeapSort(SortRequest request) {
         // 배열 생성

@@ -15,8 +15,7 @@ import java.util.Map;
 /**
  * 정렬 알고리즘 API 컨트롤러
  */
-@RestController
-@RequestMapping("/api/algorithms/sorts")
+@RestController@RequestMapping("/api/algorithms/sorts")
 public class SortController {
     private final SortService sortService;
 
@@ -27,6 +26,8 @@ public class SortController {
 
     /**
      * 지원되는 정렬 알고리즘 목록을 반환합니다.
+     * 
+     * @return ResponseEntity<Map<String, Object>> 지원되는 알고리즘 목록과 상태를 포함하는 응답
      */
     @GetMapping
     public ResponseEntity<Map<String, Object>> getSupportedAlgorithms() {
@@ -42,6 +43,9 @@ public class SortController {
 
     /**
      * 정렬 요청을 처리합니다.
+     *
+     * @param request 정렬 요청 데이터
+     * @return ResponseEntity<SortResult> 정렬 결과와 HTTP 상태 코드를 담은 응답
      */
     @PostMapping
     public ResponseEntity<SortResult> sort(@RequestBody SortRequest request) {
@@ -51,6 +55,9 @@ public class SortController {
 
     /**
      * 퀵 정렬 요청을 처리합니다.
+     *
+     * @param request 정렬 요청 데이터
+     * @return ResponseEntity<SortResult> 정렬 결과와 HTTP 상태 코드를 담은 응답
      */
     @PostMapping("/quick")
     public ResponseEntity<SortResult> quickSort(@RequestBody SortRequest request) {
@@ -61,6 +68,9 @@ public class SortController {
 
     /**
      * 합병 정렬 요청을 처리합니다.
+     *
+     * @param request 정렬 요청 데이터
+     * @return ResponseEntity<SortResult> 정렬 결과와 HTTP 상태 코드를 담은 응답
      */
     @PostMapping("/merge")
     public ResponseEntity<SortResult> mergeSort(@RequestBody SortRequest request) {
@@ -71,6 +81,9 @@ public class SortController {
     
     /**
      * 힙 정렬 요청을 처리합니다.
+     *
+     * @param request 정렬 요청 데이터
+     * @return ResponseEntity<SortResult> 정렬 결과와 HTTP 상태 코드를 담은 응답
      */
     @PostMapping("/heap")
     public ResponseEntity<SortResult> heapSort(@RequestBody SortRequest request) {
@@ -81,6 +94,11 @@ public class SortController {
 
     /**
      * 랜덤 배열 생성 및 퀵 정렬 수행
+     *
+     * @param size 배열의 크기
+     * @param minValue 배열의 최소값
+     * @param maxValue 배열의 최대값
+     * @return ResponseEntity<SortResult> 정렬 결과와 HTTP 상태 코드를 담은 응답
      */
     @GetMapping("/quick/random")
     public ResponseEntity<SortResult> randomQuickSort(
@@ -103,6 +121,9 @@ public class SortController {
 
     /**
      * 사용자 정의 배열로 퀵 정렬 수행
+     *
+     * @param values 사용자 정의 배열
+     * @return ResponseEntity<SortResult> 정렬 결과와 HTTP 상태 코드를 담은 응답
      */
     @GetMapping("/quick/arr")
     public ResponseEntity<SortResult> customArrayQuickSort(@RequestParam Integer[] values) {
@@ -118,6 +139,11 @@ public class SortController {
     
     /**
      * 랜덤 배열 생성 및 합병 정렬 수행
+     *
+     * @param size 배열의 크기
+     * @param minValue 배열의 최소값
+     * @param maxValue 배열의 최대값
+     * @return ResponseEntity<SortResult> 정렬 결과와 HTTP 상태 코드를 담은 응답
      */
     @GetMapping("/merge/random")
     public ResponseEntity<SortResult> randomMergeSort(
@@ -140,6 +166,9 @@ public class SortController {
 
     /**
      * 사용자 정의 배열로 합병 정렬 수행
+     *
+     * @param values 사용자 정의 배열
+     * @return ResponseEntity<SortResult> 정렬 결과와 HTTP 상태 코드를 담은 응답
      */
     @GetMapping("/merge/arr")
     public ResponseEntity<SortResult> customArrayMergeSort(@RequestParam Integer[] values) {
@@ -155,6 +184,11 @@ public class SortController {
     
     /**
      * 랜덤 배열 생성 및 힙 정렬 수행
+     *
+     * @param size 배열의 크기
+     * @param minValue 배열의 최소값
+     * @param maxValue 배열의 최대값
+     * @return ResponseEntity<SortResult> 정렬 결과와 HTTP 상태 코드를 담은 응답
      */
     @GetMapping("/heap/random")
     public ResponseEntity<SortResult> randomHeapSort(
@@ -177,6 +211,9 @@ public class SortController {
 
     /**
      * 사용자 정의 배열로 힙 정렬 수행
+     *
+     * @param values 사용자 정의 배열
+     * @return ResponseEntity<SortResult> 정렬 결과와 HTTP 상태 코드를 담은 응답
      */
     @GetMapping("/heap/arr")
     public ResponseEntity<SortResult> customArrayHeapSort(@RequestParam Integer[] values) {

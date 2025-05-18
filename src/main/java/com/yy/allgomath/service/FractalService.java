@@ -9,6 +9,18 @@ import java.util.stream.IntStream;
 @Service
 public class FractalService {
 
+    /**
+     * 만델브로 집합을 계산.
+     * 
+     * @param xMin 실수부 최소값
+     * @param xMax 실수부 최대값
+     * @param yMin 허수부 최소값
+     * @param yMax 허수부 최대값
+     * @param width 이미지 너비
+     * @param height 이미지 높이
+     * @param maxIterations 최대 반복 횟수
+     * @return 각 픽셀의 반복 횟수가 포함된 FractalResult 객체
+     */
     public FractalResult calculateMandelbrot(double xMin, double xMax, double yMin, double yMax,
                                              int width, int height, int maxIterations) {
         int[][] iterationCounts = new int[height][width];

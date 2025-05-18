@@ -18,7 +18,12 @@ public class QuickSortService {
         this.quickSort = new QuickSort();
     }
 
-    // 퀵 정렬 수행 메서드 (공개 API)
+    /**
+     * 퀵 정렬 수행 메서드
+     * 
+     * @param request 퀵 정렬 요청 데이터
+     * @return 퀵 정렬 결과
+     */
     public QuickSortResult performQuickSort(QuickSortRequest request) {
         // 요청에 따라 배열 생성
         TrackingElement[] arr;

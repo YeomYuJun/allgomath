@@ -19,13 +19,15 @@ import java.util.HashMap;
 public class ConvexFunctionController {
 
     /**
-     * @param xMin
-     * @param xMax
-     * @param yMin
-     * @param yMax
-     * @param resolution
-     * @param functionType
-     * @return
+     * 볼록 함수의 3D 데이터를 계산하여 반환합니다.
+     *
+     * @param xMin x 좌표의 최소값
+     * @param xMax x 좌표의 최대값
+     * @param yMin y 좌표의 최소값
+     * @param yMax y 좌표의 최대값
+     * @param resolution 해상도
+     * @param functionType 함수 타입
+     * @return 계산된 Point3D 리스트
      */
     @GetMapping("/surface")
     public ResponseEntity<List<Point3D>> getConvexFunctionData(

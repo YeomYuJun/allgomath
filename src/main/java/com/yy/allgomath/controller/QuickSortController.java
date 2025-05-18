@@ -19,7 +19,14 @@ public class QuickSortController {
         this.quickSortService = quickSortService;
     }
 
-    // 랜덤 배열로 정렬 요청 처리
+    /**
+     * 랜덤 배열로 정렬 요청 처리
+     *
+     * @param size 배열의 크기
+     * @param minValue 배열의 최소값
+     * @param maxValue 배열의 최대값
+     * @return 정렬 결과와 HTTP 상태 코드를 담은 응답
+     */
     @GetMapping(value = "/random")
     public ResponseEntity<QuickSortResult> sortRandomArray(
             @RequestParam int size,
@@ -39,7 +46,12 @@ public class QuickSortController {
         return ResponseEntity.ok(result);
     }
 
-    // 사용자 정의 배열로 정렬 요청 처리
+    /**
+     * 사용자 정의 배열로 정렬 요청 처리
+     *
+     * @param values 정렬할 배열
+     * @return 정렬 결과와 HTTP 상태 코드를 담은 응답
+     */
     @GetMapping(value = "/arr")
     public ResponseEntity<QuickSortResult> sortCustomArray(@RequestParam Integer[] values) {
         // 파라미터 검증

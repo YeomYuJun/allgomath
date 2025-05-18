@@ -1,9 +1,9 @@
 package com.yy.allgomath.datatype;
 
-import java.util.Collection;
 /*
 * implementation 'org.apache.commons:commons-math3:3.6.1' 를 사용하여 구현할 수 있으나 일단 사용해봄.
-* */
+* 복소수 연산을 위한 클래스
+*/
 public class Complex {
     private final double real;
     private final double imag;

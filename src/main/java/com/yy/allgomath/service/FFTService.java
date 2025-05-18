@@ -11,9 +11,15 @@ import java.util.List;
 
 @Service
 public class FFTService {
-
+    
     /**
-     * 시간 도메인 신호에 FFT를 적용하여 주파수 도메인 결과를 계산합니다.
+     * 시간 도메인 신호에 FFT를 적용하여 주파수 도메인 결과를 계산.
+     * 
+     * @param signal 입력 시간 도메인 신호 (TimeDomainSignal 객체)
+     * @return 주파수 도메인 결과 (FrequencyDomainResult 객체)
+     *         - frequencies: 주파수 성분 배열 (Hz)
+     *         - magnitudes: 각 주파수 성분의 진폭 배열
+     *         - phases: 각 주파수 성분의 위상 배열 (라디안)
      */
     public FrequencyDomainResult computeFFT(TimeDomainSignal signal) {
         // 신호 데이터를 2의 거듭제곱 크기로 패딩
@@ -46,7 +52,10 @@ public class FFTService {
     }
 
     /**
-     * 주파수 도메인 데이터에 역 FFT를 적용하여 시간 도메인 신호를 복원합니다.
+     * 주파수 도메인 데이터에 역 FFT를 적용하여 시간 도메인 신호를 복원.
+     * 
+     * @param frequencyData 입력 주파수 도메인 데이터 (FrequencyDomainResult 객체)
+     * @return 복원된 시간 도메인 신호 (TimeDomainSignal 객체)
      */
     public TimeDomainSignal computeInverseFFT(FrequencyDomainResult frequencyData) {
         int n = frequencyData.getFrequencies().length * 2; // Nyquist 정리에 따라 n/2 주파수 성분이 있음
@@ -87,6 +96,9 @@ public class FFTService {
 
     /**
      * FFT 알고리즘의 각 단계를 시각화하기 위한 데이터를 생성합니다.
+     * 
+     * @param signal 입력 시간 도메인 신호 (TimeDomainSignal 객체)
+     * @return 각 단계의 데이터를 포함한 리스트 (FFTStep 객체)
      */
     public List<FFTStep> getFFTSteps(TimeDomainSignal signal) {
         List<FFTStep> steps = new ArrayList<>();
@@ -111,6 +123,9 @@ public class FFTService {
 
     /**
      * 주어진 숫자보다 크거나 같은 가장 작은 2의 거듭제곱을 찾습니다.
+     * 
+     * @param n 입력 숫자
+     * @return 주어진 숫자보다 크거나 같은 가장 작은 2의 거듭제곱
      */
     private int findNextPowerOfTwo(int n) {
         int power = 1;
@@ -122,6 +137,9 @@ public class FFTService {
 
     /**
      * 분할 정복 FFT 알고리즘 구현
+     * 
+     * @param x 입력 복소수 배열
+     * @return 주파수 도메인 결과 (Complex 배열)
      */
     private Complex[] fft(Complex[] x) {
         int n = x.length;
@@ -159,6 +177,11 @@ public class FFTService {
 
     /**
      * 각 단계를 기록하는 FFT 알고리즘
+     * 
+     * @param x 입력 복소수 배열
+     * @param level 현재 레벨
+     * @param steps 각 단계를 기록하는 리스트
+     * @return 주파수 도메인 결과 (Complex 배열)
      */
     private Complex[] fftWithSteps(Complex[] x, int level, List<FFTStep> steps) {
         int n = x.length;
@@ -203,6 +226,9 @@ public class FFTService {
 
     /**
      * 역 FFT 알고리즘 구현
+     * 
+     * @param x 입력 복소수 배열
+     * @return 주파수 도메인 결과 (Complex 배열)
      */
     private Complex[] ifft(Complex[] x) {
         int n = x.length;
