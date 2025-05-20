@@ -15,10 +15,21 @@ import java.util.List;
 @RequestMapping("/api/gdd")
 public class GraDescController {
 
+    
+    /**
+     * 안장점 함수의 데이터를 계산하여 반환합니다.
+     *
+     * @param xMin x 좌표의 최소값
+     * @param xMax x 좌표의 최대값
+     * @param yMin y 좌표의 최소값
+     * @param yMax y 좌표의 최대값
+     * @param resolution 해상도
+     * @param functionType 함수 타입
+     * @return 계산된 Point3D 리스트
+     */
     @GetMapping("/anjang")
     public ResponseEntity<List<Point3D>> getSaddleFunctionData(
             @RequestParam(defaultValue = "-5", name = "xMin") double xMin,
-
             @RequestParam(defaultValue = "5", name = "xMax") double xMax,
             @RequestParam(defaultValue = "-5", name = "yMin") double yMin,
             @RequestParam(defaultValue = "5", name = "yMax") double yMax,
