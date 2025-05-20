@@ -79,4 +79,66 @@ public class FractalController {
         return ResponseEntity.ok(fractalService.calculateJulia(
                 xMin, xMax, yMin, yMax, cReal, cImag, width, height, maxIterations));
     }
+
+    /**
+     * 프론트엔드의 요구사항에 맞춘 통합 프랙탈 생성 API
+     *
+     * @param type          프랙탈 타입 (mandelbrot, julia, sierpinski, koch, barnsley)
+     * @param iterations    반복 횟수
+     * @param resolution    해상도
+     * @param colorScheme   색상 스키마 (classic, rainbow, fire, ocean, grayscale)
+     * @param smooth        부드러운 음영 적용 여부
+     * @param centerX       중심 X 좌표
+     * @param centerY       중심 Y 좌표
+     * @param zoom          줌 레벨
+     * @param juliaReal     줄리아 집합의 경우 사용할 실수부 (선택적)
+     * @param juliaImag     줄리아 집합의 경우 사용할 허수부 (선택적)
+     * @return ResponseEntity<FractalResult> 계산된 프랙탈 데이터와 HTTP 상태 코드를 담은 응답
+     */
+    @GetMapping("/generate")
+    public ResponseEntity<FractalResult> generateFractal(
+            @RequestParam(name = "type") String type,
+            @RequestParam(name = "iterations") int iterations,
+            @RequestParam(name = "resolution") int resolution,
+            @RequestParam(name = "colorScheme", defaultValue = "classic") String colorScheme,
+            @RequestParam(name = "smooth", defaultValue = "true") boolean smooth,
+            @RequestParam(name = "centerX", defaultValue = "0.0") double centerX,
+            @RequestParam(name = "centerY", defaultValue = "0.0") double centerY,
+            @RequestParam(name = "zoom", defaultValue = "1.0") double zoom,
+            @RequestParam(name = "juliaReal", required = false) Double juliaReal,
+            @RequestParam(name = "juliaImag", required = false) Double juliaImag) {
+
+        // 줌 레벨에 따른 범위 계산
+        double range = 4.0 / zoom;
+        double xMin = centerX - range/2;
+        double xMax = centerX + range/2;
+        double yMin = centerY - range/2;
+        double yMax = centerY + range/2;
+
+        // 프랙탈 타입에 따른 처리
+        switch (type.toLowerCase()) {
+            case "mandelbrot":
+                return ResponseEntity.ok(fractalService.calculateMandelbrot(
+                        xMin, xMax, yMin, yMax, resolution, resolution, iterations,
+                        colorScheme, smooth));
+            case "julia":
+                if (juliaReal == null || juliaImag == null) {
+                    throw new IllegalArgumentException("줄리아 집합의 경우 juliaReal과 juliaImag 파라미터가 필요합니다.");
+                }
+                return ResponseEntity.ok(fractalService.calculateJulia(
+                        xMin, xMax, yMin, yMax, juliaReal, juliaImag, resolution, resolution, iterations,
+                        colorScheme, smooth));
+            case "sierpinski":
+                // TODO: 시에르핀스키 삼각형 구현
+                throw new UnsupportedOperationException("시에르핀스키 삼각형은 아직 구현되지 않았습니다.");
+            case "koch":
+                // TODO: 코흐 눈송이 구현
+                throw new UnsupportedOperationException("코흐 눈송이는 아직 구현되지 않았습니다.");
+            case "barnsley":
+                // TODO: 반슬리 고사리 구현
+                throw new UnsupportedOperationException("반슬리 고사리는 아직 구현되지 않았습니다.");
+            default:
+                throw new IllegalArgumentException("지원하지 않는 프랙탈 타입입니다: " + type);
+        }
+    }
 }

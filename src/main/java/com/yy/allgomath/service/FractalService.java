@@ -19,10 +19,13 @@ public class FractalService {
      * @param width 이미지 너비
      * @param height 이미지 높이
      * @param maxIterations 최대 반복 횟수
+     * @param colorScheme 색상 스키마
+     * @param smooth 부드러운 음영 적용 여부
      * @return 각 픽셀의 반복 횟수가 포함된 FractalResult 객체
      */
     public FractalResult calculateMandelbrot(double xMin, double xMax, double yMin, double yMax,
-                                             int width, int height, int maxIterations) {
+                                             int width, int height, int maxIterations,
+                                             String colorScheme, boolean smooth) {
         int[][] iterationCounts = new int[height][width];
 
         // 병렬 처리를 위한 스트림 활용
@@ -44,10 +47,9 @@ public class FractalService {
             }
         });
 
-        return new FractalResult(width, height, iterationCounts);
+        return new FractalResult(width, height, iterationCounts, colorScheme, smooth);
     }
 
-    // Julia 집합 계산 메소드도 유사하게 구현
     /**
      * 줄리아 집합을 계산합니다.
      *
@@ -60,11 +62,13 @@ public class FractalService {
      * @param width 이미지 너비
      * @param height 이미지 높이
      * @param maxIterations 최대 반복 횟수
+     * @param colorScheme 색상 스키마
+     * @param smooth 부드러운 음영 적용 여부
      * @return 각 픽셀의 반복 횟수가 포함된 FractalResult 객체
      */
     public FractalResult calculateJulia(double xMin, double xMax, double yMin, double yMax,
                                         double cReal, double cImag, int width, int height,
-                                        int maxIterations) {
+                                        int maxIterations, String colorScheme, boolean smooth) {
         int[][] iterationCounts = new int[height][width];
 
         // 고정 매개변수 c
@@ -92,6 +96,18 @@ public class FractalService {
             }
         });
 
-        return new FractalResult(width, height, iterationCounts);
+        return new FractalResult(width, height, iterationCounts, colorScheme, smooth);
+    }
+
+    // 기존 메서드들에 대한 하위 호환성 유지
+    public FractalResult calculateMandelbrot(double xMin, double xMax, double yMin, double yMax,
+                                             int width, int height, int maxIterations) {
+        return calculateMandelbrot(xMin, xMax, yMin, yMax, width, height, maxIterations, "classic", true);
+    }
+
+    public FractalResult calculateJulia(double xMin, double xMax, double yMin, double yMax,
+                                        double cReal, double cImag, int width, int height,
+                                        int maxIterations) {
+        return calculateJulia(xMin, xMax, yMin, yMax, cReal, cImag, width, height, maxIterations, "classic", true);
     }
 }
