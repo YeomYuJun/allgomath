@@ -51,15 +51,25 @@ public class FractalResult {
                     pixels[idx + 3] = (byte) 255; // A
                 } else {
                     // 색상 스키마에 따른 색상 계산
-                    double normalized = smooth ? 
-                        (iterations + 1 - Math.log(Math.log(Math.sqrt(iterationCounts[y][x]))) / Math.log(2)) / maxIterations :
-                        (double) iterations / maxIterations;
+                    double normalized;
+                    if (smooth && iterations > 0) {
+                        // 부드러운 음영처리를 위한 로그 계산 시 유효성 검사 추가
+                        // 음수와 0을 방지하기 위해 값 검증
+                        double magnitude = Math.max(1.0e-10, iterationCounts[y][x]);
+                        normalized = (iterations + 1 - Math.log(Math.log(magnitude)) / Math.log(2)) / maxIterations;
+                    } else {
+                        normalized = (double) iterations / maxIterations;
+                    }
+                    
+                    // 정규화된 값을 0-1 범위로 제한
+                    normalized = Math.max(0.0, Math.min(1.0, normalized));
                     
                     int[] color = getColor(normalized);
-                    pixels[idx] = (byte) color[0];     // R
-                    pixels[idx + 1] = (byte) color[1]; // G
-                    pixels[idx + 2] = (byte) color[2]; // B
-                    pixels[idx + 3] = (byte) 255;      // A
+                    // 바이트 변환 시 오버플로우 방지를 위해 & 0xFF 연산 추가
+                    pixels[idx] = (byte) (color[0] & 0xFF);     // R
+                    pixels[idx + 1] = (byte) (color[1] & 0xFF); // G
+                    pixels[idx + 2] = (byte) (color[2] & 0xFF); // B
+                    pixels[idx + 3] = (byte) 255;               // A
                 }
             }
         }
