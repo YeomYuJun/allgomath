@@ -132,11 +132,11 @@ public class FractalController {
                 return ResponseEntity.ok(fractalService.calculateSierpinski(
                         xMin, xMax, yMin, yMax, resolution, resolution, iterations,
                         colorScheme, smooth));
-                // TODO: 시에르핀스키 삼각형 구현
-                //throw new UnsupportedOperationException("시에르핀스키 삼각형은 아직 구현되지 않았습니다.");
             case "koch":
-                // TODO: 코흐 눈송이 구현
-                throw new UnsupportedOperationException("코흐 눈송이는 아직 구현되지 않았습니다.");
+                //코흐 삼각형
+                return ResponseEntity.ok(fractalService.calculateKoch(
+                        xMin, xMax, yMin, yMax, resolution, resolution, iterations,
+                        colorScheme, smooth));
             case "barnsley":
                 // TODO: 반슬리 고사리 구현
                 throw new UnsupportedOperationException("반슬리 고사리는 아직 구현되지 않았습니다.");
