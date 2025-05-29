@@ -138,8 +138,9 @@ public class FractalController {
                         xMin, xMax, yMin, yMax, resolution, resolution, iterations,
                         colorScheme, smooth));
             case "barnsley":
-                // TODO: 반슬리 고사리 구현
-                throw new UnsupportedOperationException("반슬리 고사리는 아직 구현되지 않았습니다.");
+                return ResponseEntity.ok(fractalService.calculateBarnsley(
+                        xMin, xMax, yMin, yMax, resolution, resolution, iterations,
+                        colorScheme, smooth));
             default:
                 throw new IllegalArgumentException("지원하지 않는 프랙탈 타입입니다: " + type);
         }

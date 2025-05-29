@@ -202,6 +202,9 @@ public class FractalService {
                                        String colorScheme, boolean smooth) {
         int[][] pixelData = new int[height][width];
 
+        // 반복 횟수 제한 (성능 고려)
+        int actualIterations = Math.min(maxIterations, 7); // 최대 7회로 제한
+
         // 초기 정삼각형의 꼭짓점 정의
         double size = 0.6; // 삼각형 크기
         double centerX = 0.0;
@@ -214,95 +217,85 @@ public class FractalService {
         triangle[2] = new Point2D(centerX + size * Math.sqrt(3)/2, centerY - size/3); // 우하단
 
         // 각 변에 대해 코흐 곡선 생성
-        List<Point2D> allPoint2Ds = new ArrayList<>();
+        List<Point2D> allPoints = new ArrayList<>();
 
         // 삼각형의 3개 변을 각각 코흐 곡선으로 변환
         for (int i = 0; i < 3; i++) {
             Point2D start = triangle[i];
             Point2D end = triangle[(i + 1) % 3];
-            List<Point2D> kochCurve = generateKochCurve(start, end, maxIterations);
-            allPoint2Ds.addAll(kochCurve);
+            generateKochCurveOptimized(start, end, actualIterations, allPoints);
         }
 
         // 점들을 픽셀 데이터로 렌더링
-        renderPoint2DsToPixels(allPoint2Ds, pixelData, xMin, xMax, yMin, yMax, width, height);
+        renderPointsToPixelsOptimized(allPoints, pixelData, xMin, xMax, yMin, yMax, width, height);
 
         return new FractalResult(width, height, pixelData, colorScheme, smooth);
     }
 
     /**
-     * 두 점 사이에 코흐 곡선을 재귀적으로 생성
+     * 최적화된 코흐 곡선 생성 메서드
      */
-    private List<Point2D> generateKochCurve(Point2D start, Point2D end, int depth) {
-        List<Point2D> Point2Ds = new ArrayList<>();
-
+    private void generateKochCurveOptimized(Point2D start, Point2D end, int depth, List<Point2D> points) {
         if (depth == 0) {
-            // 기본 케이스: 단순한 선분
-            Point2Ds.add(start);
-            Point2Ds.add(end);
-        } else {
-            // 선분을 3등분
-            double dx = end.getX() - start.getX();
-            double dy = end.getY() - start.getY();
-
-            Point2D p1 = start;
-            Point2D p2 = new Point2D(start.getX() + dx/3, start.getY() + dy/3);
-            Point2D p4 = new Point2D(start.getX() + 2*dx/3, start.getY() + 2*dy/3);
-            Point2D p5 = end;
-
-            // 정삼각형의 꼭짓점 계산 (p2와 p4를 밑변으로 하는)
-            double mx = (p2.getX() + p4.getX()) / 2; // 중점
-            double my = (p2.getY() + p4.getY()) / 2;
-
-            // 수직 벡터 (90도 회전)
-            double perpX = -(p4.getY() - p2.getY());
-            double perpY = (p4.getX() - p2.getX());
-
-            // 정삼각형 높이
-            double height = Math.sqrt(3) / 6 * Math.sqrt(dx*dx + dy*dy);
-            double length = Math.sqrt(perpX*perpX + perpY*perpY);
-
-            Point2D p3 = new Point2D(
-                    mx + perpX * height / length,
-                    my + perpY * height / length
-            );
-
-            // 4개 선분에 대해 재귀 호출
-            Point2Ds.addAll(generateKochCurve(p1, p2, depth - 1));
-            Point2Ds.addAll(generateKochCurve(p2, p3, depth - 1));
-            Point2Ds.addAll(generateKochCurve(p3, p4, depth - 1));
-            Point2Ds.addAll(generateKochCurve(p4, p5, depth - 1));
+            points.add(start);
+            return;
         }
 
-        return Point2Ds;
+        // 선분을 3등분
+        double dx = end.getX() - start.getX();
+        double dy = end.getY() - start.getY();
+
+        Point2D p1 = start;
+        Point2D p2 = new Point2D(start.getX() + dx/3, start.getY() + dy/3);
+        Point2D p4 = new Point2D(start.getX() + 2*dx/3, start.getY() + 2*dy/3);
+        Point2D p5 = end;
+
+        // 정삼각형의 꼭짓점 계산
+        double mx = (p2.getX() + p4.getX()) / 2;
+        double my = (p2.getY() + p4.getY()) / 2;
+        double perpX = -(p4.getY() - p2.getY());
+        double perpY = (p4.getX() - p2.getX());
+        double height = Math.sqrt(3) / 6 * Math.sqrt(dx*dx + dy*dy);
+        double length = Math.sqrt(perpX*perpX + perpY*perpY);
+
+        Point2D p3 = new Point2D(
+                mx + perpX * height / length,
+                my + perpY * height / length
+        );
+
+        // 재귀 호출
+        generateKochCurveOptimized(p1, p2, depth - 1, points);
+        generateKochCurveOptimized(p2, p3, depth - 1, points);
+        generateKochCurveOptimized(p3, p4, depth - 1, points);
+        generateKochCurveOptimized(p4, p5, depth - 1, points);
     }
 
     /**
-     * 점들을 픽셀 배열에 렌더링 (Bresenham 라인 알고리즘 사용).
+     * 최적화된 픽셀 렌더링 메서드
      */
-    private void renderPoint2DsToPixels(List<Point2D> Point2Ds, int[][] pixelData,
-                                        double xMin, double xMax, double yMin, double yMax,
-                                        int width, int height) {
-        for (int i = 0; i < Point2Ds.size() - 1; i++) {
-            Point2D p1 = Point2Ds.get(i);
-            Point2D p2 = Point2Ds.get(i + 1);
+    private void renderPointsToPixelsOptimized(List<Point2D> points, int[][] pixelData,
+                                             double xMin, double xMax, double yMin, double yMax,
+                                             int width, int height) {
+        for (int i = 0; i < points.size() - 1; i++) {
+            Point2D p1 = points.get(i);
+            Point2D p2 = points.get(i + 1);
 
             // 월드 좌표를 픽셀 좌표로 변환
             int x1 = (int) ((p1.getX() - xMin) / (xMax - xMin) * width);
-            int y1 = (int) ((p1.getX() - yMin) / (yMax - yMin) * height);
+            int y1 = (int) ((p1.getY() - yMin) / (yMax - yMin) * height);
             int x2 = (int) ((p2.getX() - xMin) / (xMax - xMin) * width);
-            int y2 = (int) ((p2.getX() - yMin) / (yMax - yMin) * height);
+            int y2 = (int) ((p2.getY() - yMin) / (yMax - yMin) * height);
 
-            // Bresenham 라인 그리기
-            drawLine(pixelData, x1, y1, x2, y2, width, height, 255); // 최대 강도로 설정
+            // Bresenham 라인 알고리즘으로 선분 그리기
+            drawLineOptimized(pixelData, x1, y1, x2, y2, width, height);
         }
     }
 
     /**
-     * Bresenham 라인 알고리즘으로 선분을 그림
+     * 최적화된 Bresenham 라인 알고리즘
      */
-    private void drawLine(int[][] pixels, int x0, int y0, int x1, int y1,
-                          int width, int height, int intensity) {
+    private void drawLineOptimized(int[][] pixels, int x0, int y0, int x1, int y1,
+                                 int width, int height) {
         int dx = Math.abs(x1 - x0);
         int dy = Math.abs(y1 - y0);
         int sx = x0 < x1 ? 1 : -1;
@@ -310,9 +303,8 @@ public class FractalService {
         int err = dx - dy;
 
         while (true) {
-            // 경계 검사 후 픽셀 설정
             if (x0 >= 0 && x0 < width && y0 >= 0 && y0 < height) {
-                pixels[y0][x0] = intensity;
+                pixels[y0][x0] = 255;
             }
 
             if (x0 == x1 && y0 == y1) break;
@@ -333,5 +325,100 @@ public class FractalService {
     public FractalResult calculateKoch(double xMin, double xMax, double yMin, double yMax,
                                        int width, int height, int maxIterations) {
         return calculateKoch(xMin, xMax, yMin, yMax, width, height, maxIterations, "classic", true);
+    }
+
+    /**
+     * 반슬리 고사리를 계산 (IFS 알고리즘 사용).
+     *
+     * @param xMin 실수부 최소값
+     * @param xMax 실수부 최대값
+     * @param yMin 허수부 최소값
+     * @param yMax 허수부 최대값
+     * @param width 이미지 너비
+     * @param height 이미지 높이
+     * @param maxIterations 점 생성 횟수
+     * @param colorScheme 색상 스키마
+     * @param smooth 부드러운 음영 적용 여부
+     * @return 각 픽셀의 히트 카운트가 포함된 FractalResult 객체
+     */
+    public FractalResult calculateBarnsley(double xMin, double xMax, double yMin, double yMax,
+                                          int width, int height, int maxIterations,
+                                          String colorScheme, boolean smooth) {
+        int[][] hitCounts = new int[height][width];
+
+        // 시작점
+        double x = 0.0;
+        double y = 0.0;
+
+        Random random = new Random();
+
+        // IFS 변환 행렬과 확률
+        double[][] transforms = {
+            {0.0, 0.0, 0.0, 0.16, 0.0, 0.0, 0.01},    // 줄기
+            {0.85, 0.04, -0.04, 0.85, 0.0, 1.6, 0.85}, // 작은 잎
+            {0.2, -0.26, 0.23, 0.22, 0.0, 1.6, 0.07},  // 왼쪽 잎
+            {-0.15, 0.28, 0.26, 0.24, 0.0, 0.44, 0.07}  // 오른쪽 잎
+        };
+
+        // 처음 몇 번의 반복은 건너뛰기 (수렴을 위해)
+        for (int i = 0; i < 100; i++) {
+            double r = random.nextDouble();
+            double sum = 0.0;
+            int transformIndex = 0;
+
+            // 확률에 따른 변환 선택
+            for (int j = 0; j < transforms.length; j++) {
+                sum += transforms[j][6];
+                if (r < sum) {
+                    transformIndex = j;
+                    break;
+                }
+            }
+
+            // 선택된 변환 적용
+            double newX = transforms[transformIndex][0] * x + transforms[transformIndex][1] * y + transforms[transformIndex][4];
+            double newY = transforms[transformIndex][2] * x + transforms[transformIndex][3] * y + transforms[transformIndex][5];
+            x = newX;
+            y = newY;
+        }
+
+        // 메인 반복
+        for (int i = 0; i < maxIterations; i++) {
+            double r = random.nextDouble();
+            double sum = 0.0;
+            int transformIndex = 0;
+
+            // 확률에 따른 변환 선택
+            for (int j = 0; j < transforms.length; j++) {
+                sum += transforms[j][6];
+                if (r < sum) {
+                    transformIndex = j;
+                    break;
+                }
+            }
+
+            // 선택된 변환 적용
+            double newX = transforms[transformIndex][0] * x + transforms[transformIndex][1] * y + transforms[transformIndex][4];
+            double newY = transforms[transformIndex][2] * x + transforms[transformIndex][3] * y + transforms[transformIndex][5];
+            x = newX;
+            y = newY;
+
+            // 화면 좌표로 변환
+            int pixelX = (int) ((x - xMin) / (xMax - xMin) * width);
+            int pixelY = (int) ((y - yMin) / (yMax - yMin) * height);
+
+            // 경계 검사
+            if (pixelX >= 0 && pixelX < width && pixelY >= 0 && pixelY < height) {
+                hitCounts[pixelY][pixelX]++;
+            }
+        }
+
+        return new FractalResult(width, height, hitCounts, colorScheme, smooth);
+    }
+
+    // 하위 호환성을 위한 오버로드 메서드
+    public FractalResult calculateBarnsley(double xMin, double xMax, double yMin, double yMax,
+                                          int width, int height, int maxIterations) {
+        return calculateBarnsley(xMin, xMax, yMin, yMax, width, height, maxIterations, "classic", true);
     }
 }
