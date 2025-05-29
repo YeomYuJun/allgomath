@@ -188,7 +188,7 @@ public class FractalService {
      *
      * @param xMin 실수부 최소값
      * @param xMax 실수부 최대값
-     * @param yMin 허수부 최소값  
+     * @param yMin 허수부 최소값
      * @param yMax 허수부 최대값
      * @param width 이미지 너비
      * @param height 이미지 높이
@@ -203,7 +203,7 @@ public class FractalService {
         int[][] pixelData = new int[height][width];
 
         // 반복 횟수 제한 (성능 고려)
-        int actualIterations = Math.min(maxIterations, 7); // 최대 7회로 제한
+        int actualIterations = Math.min(maxIterations, 5); // 최대 5회로 더 제한
 
         // 초기 정삼각형의 꼭짓점 정의
         double size = 0.6; // 삼각형 크기
@@ -216,28 +216,26 @@ public class FractalService {
         triangle[1] = new Point2D(centerX - size * Math.sqrt(3)/2, centerY - size/3); // 좌하단
         triangle[2] = new Point2D(centerX + size * Math.sqrt(3)/2, centerY - size/3); // 우하단
 
-        // 각 변에 대해 코흐 곡선 생성
-        List<Point2D> allPoints = new ArrayList<>();
-
-        // 삼각형의 3개 변을 각각 코흐 곡선으로 변환
+        // 각 변에 대해 코흐 곡선 생성 및 직접 렌더링
         for (int i = 0; i < 3; i++) {
             Point2D start = triangle[i];
             Point2D end = triangle[(i + 1) % 3];
-            generateKochCurveOptimized(start, end, actualIterations, allPoints);
+            generateAndRenderKochCurve(start, end, actualIterations, pixelData, xMin, xMax, yMin, yMax, width, height);
         }
 
-        // 점들을 픽셀 데이터로 렌더링
-        renderPointsToPixelsOptimized(allPoints, pixelData, xMin, xMax, yMin, yMax, width, height);
 
         return new FractalResult(width, height, pixelData, colorScheme, smooth);
     }
 
     /**
-     * 최적화된 코흐 곡선 생성 메서드
+     * 코흐 곡선을 생성하고 직접 렌더링하는 최적화된 메서드
      */
-    private void generateKochCurveOptimized(Point2D start, Point2D end, int depth, List<Point2D> points) {
+    private void generateAndRenderKochCurve(Point2D start, Point2D end, int depth,
+                                          int[][] pixelData, double xMin, double xMax,
+                                          double yMin, double yMax, int width, int height) {
         if (depth == 0) {
-            points.add(start);
+            // 기본 케이스: 단순한 선분을 직접 렌더링
+            renderLine(start, end, pixelData, xMin, xMax, yMin, yMax, width, height);
             return;
         }
 
@@ -255,68 +253,55 @@ public class FractalService {
         double my = (p2.getY() + p4.getY()) / 2;
         double perpX = -(p4.getY() - p2.getY());
         double perpY = (p4.getX() - p2.getX());
-        double height = Math.sqrt(3) / 6 * Math.sqrt(dx*dx + dy*dy);
+        double triangleHeight = Math.sqrt(3) / 6 * Math.sqrt(dx*dx + dy*dy);
         double length = Math.sqrt(perpX*perpX + perpY*perpY);
 
         Point2D p3 = new Point2D(
-                mx + perpX * height / length,
-                my + perpY * height / length
+                mx + perpX * triangleHeight / length,
+                my + perpY * triangleHeight / length
         );
 
         // 재귀 호출
-        generateKochCurveOptimized(p1, p2, depth - 1, points);
-        generateKochCurveOptimized(p2, p3, depth - 1, points);
-        generateKochCurveOptimized(p3, p4, depth - 1, points);
-        generateKochCurveOptimized(p4, p5, depth - 1, points);
+        generateAndRenderKochCurve(p1, p2, depth - 1, pixelData, xMin, xMax, yMin, yMax, width, height);
+        generateAndRenderKochCurve(p2, p3, depth - 1, pixelData, xMin, xMax, yMin, yMax, width, height);
+        generateAndRenderKochCurve(p3, p4, depth - 1, pixelData, xMin, xMax, yMin, yMax, width, height);
+        generateAndRenderKochCurve(p4, p5, depth - 1, pixelData, xMin, xMax, yMin, yMax, width, height);
     }
 
     /**
-     * 최적화된 픽셀 렌더링 메서드
+     * 두 점 사이의 선분을 직접 렌더링
      */
-    private void renderPointsToPixelsOptimized(List<Point2D> points, int[][] pixelData,
-                                             double xMin, double xMax, double yMin, double yMax,
-                                             int width, int height) {
-        for (int i = 0; i < points.size() - 1; i++) {
-            Point2D p1 = points.get(i);
-            Point2D p2 = points.get(i + 1);
+    private void renderLine(Point2D start, Point2D end, int[][] pixelData,
+                          double xMin, double xMax, double yMin, double yMax,
+                          int width, int height) {
+        // 월드 좌표를 픽셀 좌표로 변환
+        int x1 = (int) ((start.getX() - xMin) / (xMax - xMin) * width);
+        int y1 = (int) ((start.getY() - yMin) / (yMax - yMin) * height);
+        int x2 = (int) ((end.getX() - xMin) / (xMax - xMin) * width);
+        int y2 = (int) ((end.getY() - yMin) / (yMax - yMin) * height);
 
-            // 월드 좌표를 픽셀 좌표로 변환
-            int x1 = (int) ((p1.getX() - xMin) / (xMax - xMin) * width);
-            int y1 = (int) ((p1.getY() - yMin) / (yMax - yMin) * height);
-            int x2 = (int) ((p2.getX() - xMin) / (xMax - xMin) * width);
-            int y2 = (int) ((p2.getY() - yMin) / (yMax - yMin) * height);
-
-            // Bresenham 라인 알고리즘으로 선분 그리기
-            drawLineOptimized(pixelData, x1, y1, x2, y2, width, height);
-        }
-    }
-
-    /**
-     * 최적화된 Bresenham 라인 알고리즘
-     */
-    private void drawLineOptimized(int[][] pixels, int x0, int y0, int x1, int y1,
-                                 int width, int height) {
-        int dx = Math.abs(x1 - x0);
-        int dy = Math.abs(y1 - y0);
-        int sx = x0 < x1 ? 1 : -1;
-        int sy = y0 < y1 ? 1 : -1;
+        // Bresenham 라인 알고리즘으로 선분 그리기
+        int dx = Math.abs(x2 - x1);
+        int dy = Math.abs(y2 - y1);
+        int sx = x1 < x2 ? 1 : -1;
+        int sy = y1 < y2 ? 1 : -1;
         int err = dx - dy;
 
         while (true) {
-            if (x0 >= 0 && x0 < width && y0 >= 0 && y0 < height) {
-                pixels[y0][x0] = 255;
+            if (x1 >= 0 && x1 < width && y1 >= 0 && y1 < height) {
+                pixelData[y1][x1] = 255;
             }
 
-            if (x0 == x1 && y0 == y1) break;
+            if (x1 == x2 && y1 == y2) break;
 
             int e2 = 2 * err;
             if (e2 > -dy) {
                 err -= dy;
-                x0 += sx;
+                x1 += sx;
             }
             if (e2 < dx) {
                 err += dx;
-                y0 += sy;
+                y1 += sy;
             }
         }
     }
