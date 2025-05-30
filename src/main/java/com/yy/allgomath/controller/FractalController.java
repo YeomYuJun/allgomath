@@ -132,11 +132,6 @@ public class FractalController {
                 return ResponseEntity.ok(fractalService.calculateSierpinski(
                         xMin, xMax, yMin, yMax, resolution, resolution, iterations,
                         colorScheme, smooth));
-            case "koch":
-                //코흐 삼각형
-                return ResponseEntity.ok(fractalService.calculateKoch(
-                        xMin, xMax, yMin, yMax, resolution, resolution, iterations,
-                        colorScheme, smooth));
             case "barnsley":
                 return ResponseEntity.ok(fractalService.calculateBarnsley(
                         xMin, xMax, yMin, yMax, resolution, resolution, iterations,
