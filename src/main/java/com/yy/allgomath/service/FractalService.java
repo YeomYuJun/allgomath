@@ -2,11 +2,8 @@ package com.yy.allgomath.service;
 
 import com.yy.allgomath.datatype.Complex;
 import com.yy.allgomath.datatype.FractalResult;
-import com.yy.allgomath.datatype.Point2D;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
 
@@ -123,13 +120,18 @@ public class FractalService {
         int[][] hitCounts = new int[height][width];
 
         // 시에르핀스키 삼각형의 3개 꼭짓점 정의 (정삼각형)
-        double[] vertex1 = {0.0, 0.8};    // 상단
-        double[] vertex2 = {-0.7, -0.4};  // 좌하단
-        double[] vertex3 = {0.7, -0.4};   // 우하단
+        // 좌표를 현재 뷰포트에 맞게 조정
+        double centerX = (xMax + xMin) / 2;
+        double centerY = (yMax + yMin) / 2;
+        double size = Math.min(xMax - xMin, yMax - yMin) * 0.4; // 뷰포트 크기에 비례하여 조정
+
+        double[] vertex1 = {centerX, centerY + size};                    // 상단
+        double[] vertex2 = {centerX - size * Math.sqrt(3)/2, centerY - size/2}; // 좌하단
+        double[] vertex3 = {centerX + size * Math.sqrt(3)/2, centerY - size/2}; // 우하단
 
         // 시작점 (임의의 점)
-        double currentX = 0.0;
-        double currentY = 0.0;
+        double currentX = centerX;
+        double currentY = centerY;
 
         Random random = new Random();
 
