@@ -2,53 +2,93 @@ package com.yy.allgomath.datatype;
 
 /**
  * 프랙탈 계산 결과를 저장하는 클래스
- * 픽셀 데이터와 메타데이터를 포함
+ * 픽셀 데이터와 메타데이터를 포함하며 부드러운 음영을 지원
  */
 public class FractalResult {
     private int width;                // 이미지 너비
     private int height;               // 이미지 높이
-    private int[][] iterationCounts;  // 각 픽셀의 반복 횟수 또는 히트 카운트
+    private double[][] smoothValues;  // 각 픽셀의 부드러운 반복값 (연속값)
     private String colorScheme;       // 색상 스키마
     private boolean smooth;           // 부드러운 음영 적용 여부
-    private byte[] pixels;            // RGBA 형식의 픽셀 데이터
+    private byte[] pixels;            // RGBA 형식의 픽셀 데이터 (지연 로딩)
 
     /**
-     * 기본 생성자
-     * 클래식 색상 스키마와 부드러운 음영을 기본값으로 사용
+     * 부드러운 값을 사용하는 생성자
+     */
+    public FractalResult(int width, int height, double[][] smoothValues, String colorScheme, boolean smooth) {
+        this.width = width;
+        this.height = height;
+        this.smoothValues = smoothValues;
+        this.colorScheme = colorScheme;
+        this.smooth = smooth;
+        // pixels는 지연 로딩으로 처리
+    }
+
+    /**
+     * 하위 호환성을 위한 생성자 (정수 배열 사용)
      */
     public FractalResult(int width, int height, int[][] iterationCounts) {
         this.width = width;
         this.height = height;
-        this.iterationCounts = iterationCounts;
         this.colorScheme = "classic";
-        this.smooth = true;
-        this.pixels = generatePixels();
+        this.smooth = false;
+        
+        // int[][]를 double[][]로 변환
+        this.smoothValues = new double[height][width];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                this.smoothValues[y][x] = iterationCounts[y][x];
+            }
+        }
     }
 
     /**
-     * 사용자 정의 색상 스키마와 음영 설정을 포함한 생성자
+     * 하위 호환성을 위한 생성자 (정수 배열 + 설정)
      */
     public FractalResult(int width, int height, int[][] iterationCounts, String colorScheme, boolean smooth) {
         this.width = width;
         this.height = height;
-        this.iterationCounts = iterationCounts;
         this.colorScheme = colorScheme;
         this.smooth = smooth;
-        this.pixels = generatePixels();
+        
+        // int[][]를 double[][]로 변환
+        this.smoothValues = new double[height][width];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                this.smoothValues[y][x] = iterationCounts[y][x];
+            }
+        }
     }
 
     /**
-     * 반복 횟수 또는 히트 카운트를 RGBA 픽셀 데이터로 변환
+     * 지연 로딩으로 픽셀 데이터 생성
+     * @return RGBA 형식의 바이트 배열
+     */
+    public byte[] getPixels() {
+        if (pixels == null) {
+            pixels = generatePixels();
+        }
+        return pixels;
+    }
+
+    /**
+     * 부드러운 값들을 RGBA 픽셀 데이터로 변환
      * @return RGBA 형식의 바이트 배열
      */
     private byte[] generatePixels() {
         byte[] pixels = new byte[width * height * 4]; // RGBA
-        int maxValue = 0;
         
-        // 최대값 계산
+        // 최대값과 최소값 계산 (정규화를 위해)
+        double minValue = Double.MAX_VALUE;
+        double maxValue = Double.MIN_VALUE;
+        
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                maxValue = Math.max(maxValue, iterationCounts[y][x]);
+                double value = smoothValues[y][x];
+                if (value > 0) { // 발산한 점들만 고려
+                    minValue = Math.min(minValue, value);
+                    maxValue = Math.max(maxValue, value);
+                }
             }
         }
 
@@ -56,17 +96,17 @@ public class FractalResult {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int idx = (y * width + x) * 4;
-                int value = iterationCounts[y][x];
+                double value = smoothValues[y][x];
                 
-                if (value == 0) {
-                    // 배경색 설정 (흰색)
-                    pixels[idx] = (byte) 255;     // R
-                    pixels[idx + 1] = (byte) 255; // G
-                    pixels[idx + 2] = (byte) 255; // B
+                if (value <= 0) {
+                    // 수렴하는 점들 (집합 내부) - 검은색
+                    pixels[idx] = 0;     // R
+                    pixels[idx + 1] = 0; // G
+                    pixels[idx + 2] = 0; // B
                     pixels[idx + 3] = (byte) 255; // A
                 } else {
-                    // 색상 스키마에 따른 색상 계산
-                    double normalized = (double) value / maxValue;
+                    // 발산하는 점들 - 부드러운 색상 적용
+                    double normalized = (value - minValue) / (maxValue - minValue);
                     normalized = Math.max(0.0, Math.min(1.0, normalized));
                     
                     int[] color = getColor(normalized);
@@ -97,7 +137,7 @@ public class FractalResult {
     }
 
     /**
-     * 클래식 색상 스키마 (흑백)
+     * 클래식 색상 스키마 (부드러운 그레이스케일)
      */
     private int[] getClassicColor(double normalized) {
         int value = (int) (normalized * 255);
@@ -105,50 +145,96 @@ public class FractalResult {
     }
 
     /**
-     * 무지개 색상 스키마 (HSV 색상 공간 기반)
+     * 개선된 무지개 색상 스키마 (HSV에서 RGB로 변환)
      */
     private int[] getRainbowColor(double normalized) {
-        double hue = normalized * 6.0;
-        double saturation = 1.0;
-        double brightness = 1.0;
+        double hue = normalized * 300.0; // 0-300도 (보라색 제외)
+        double saturation = 0.8;
+        double brightness = 0.9;
         
-        int h = (int) hue;
-        double f = hue - h;
-        double p = brightness * (1 - saturation);
-        double q = brightness * (1 - saturation * f);
-        double t = brightness * (1 - saturation * (1 - f));
+        return hsvToRgb(hue, saturation, brightness);
+    }
+
+    /**
+     * HSV를 RGB로 변환
+     */
+    private int[] hsvToRgb(double h, double s, double v) {
+        double c = v * s;
+        double x = c * (1 - Math.abs(((h / 60.0) % 2) - 1));
+        double m = v - c;
         
-        int r, g, b;
-        switch (h) {
-            case 0: r = (int)(brightness * 255); g = (int)(t * 255); b = (int)(p * 255); break;
-            case 1: r = (int)(q * 255); g = (int)(brightness * 255); b = (int)(p * 255); break;
-            case 2: r = (int)(p * 255); g = (int)(brightness * 255); b = (int)(t * 255); break;
-            case 3: r = (int)(p * 255); g = (int)(q * 255); b = (int)(brightness * 255); break;
-            case 4: r = (int)(t * 255); g = (int)(p * 255); b = (int)(brightness * 255); break;
-            default: r = (int)(brightness * 255); g = (int)(p * 255); b = (int)(q * 255);
+        double r = 0, g = 0, b = 0;
+        
+        if (h >= 0 && h < 60) {
+            r = c; g = x; b = 0;
+        } else if (h >= 60 && h < 120) {
+            r = x; g = c; b = 0;
+        } else if (h >= 120 && h < 180) {
+            r = 0; g = c; b = x;
+        } else if (h >= 180 && h < 240) {
+            r = 0; g = x; b = c;
+        } else if (h >= 240 && h < 300) {
+            r = x; g = 0; b = c;
+        } else if (h >= 300 && h < 360) {
+            r = c; g = 0; b = x;
         }
         
-        return new int[]{r, g, b};
+        return new int[]{
+            (int) ((r + m) * 255),
+            (int) ((g + m) * 255),
+            (int) ((b + m) * 255)
+        };
     }
 
     /**
-     * 화염 색상 스키마 (빨강-노랑-파랑 그라데이션)
+     * 부드러운 화염 색상 스키마
      */
     private int[] getFireColor(double normalized) {
-        int r = (int) (Math.min(1.0, normalized * 2) * 255);
-        int g = (int) (Math.max(0.0, Math.min(1.0, (normalized - 0.5) * 2)) * 255);
-        int b = (int) (Math.max(0.0, Math.min(1.0, (normalized - 0.75) * 4)) * 255);
-        return new int[]{r, g, b};
+        // 부드러운 화염 색상: 검은색 -> 빨간색 -> 노란색 -> 흰색
+        if (normalized < 0.33) {
+            double t = normalized / 0.33;
+            return new int[]{
+                (int) (t * 255),
+                0,
+                0
+            };
+        } else if (normalized < 0.66) {
+            double t = (normalized - 0.33) / 0.33;
+            return new int[]{
+                255,
+                (int) (t * 255),
+                0
+            };
+        } else {
+            double t = (normalized - 0.66) / 0.34;
+            return new int[]{
+                255,
+                255,
+                (int) (t * 255)
+            };
+        }
     }
 
     /**
-     * 해양 색상 스키마 (파랑-초록-빨강 그라데이션)
+     * 부드러운 해양 색상 스키마
      */
     private int[] getOceanColor(double normalized) {
-        int r = (int) (Math.max(0.0, Math.min(1.0, (normalized - 0.5) * 2)) * 255);
-        int g = (int) (Math.max(0.0, Math.min(1.0, (normalized - 0.25) * 2)) * 255);
-        int b = (int) (Math.min(1.0, normalized * 2) * 255);
-        return new int[]{r, g, b};
+        // 부드러운 해양 색상: 검은색 -> 진한 파란색 -> 하늘색 -> 흰색
+        if (normalized < 0.5) {
+            double t = normalized / 0.5;
+            return new int[]{
+                0,
+                (int) (t * 128),
+                (int) (t * 255)
+            };
+        } else {
+            double t = (normalized - 0.5) / 0.5;
+            return new int[]{
+                (int) (t * 255),
+                (int) (128 + t * 127),
+                255
+            };
+        }
     }
 
     /**
@@ -162,8 +248,21 @@ public class FractalResult {
     // Getter 메서드들
     public int getWidth() { return width; }
     public int getHeight() { return height; }
-    public int[][] getIterationCounts() { return iterationCounts; }
+    public double[][] getSmoothValues() { return smoothValues; }
     public String getColorScheme() { return colorScheme; }
     public boolean isSmooth() { return smooth; }
-    public byte[] getPixels() { return pixels; }
+    
+    /**
+     * 하위 호환성을 위한 메서드
+     */
+    @Deprecated
+    public int[][] getIterationCounts() {
+        int[][] intValues = new int[height][width];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                intValues[y][x] = (int) smoothValues[y][x];
+            }
+        }
+        return intValues;
+    }
 }
