@@ -24,16 +24,19 @@ public class FractalCalculatorFactory {
     public FractalCalculatorFactory(List<FractalCalculator> calculatorList) {
         this.calculators = new HashMap<>();
         
-        // 각 계산기를 타입별로 등록
+        // 각 계산기를 타입별로 등록 (만델브로트와 줄리아 집합만)
         for (FractalCalculator calculator : calculatorList) {
-            calculators.put(calculator.getSupportedType().toLowerCase(), calculator);
+            String type = calculator.getSupportedType().toLowerCase();
+            if (type.equals("mandelbrot") || type.equals("julia")) {
+                calculators.put(type, calculator);
+            }
         }
     }
     
     /**
      * 프랙탈 타입에 해당하는 계산기 반환
      * 
-     * @param fractalType 프랙탈 타입 (mandelbrot, julia, sierpinski, barnsley 등)
+     * @param fractalType 프랙탈 타입 (mandelbrot, julia)
      * @return 해당 타입의 계산기
      * @throws IllegalArgumentException 지원하지 않는 타입인 경우
      */
@@ -42,10 +45,14 @@ public class FractalCalculatorFactory {
             throw new IllegalArgumentException("프랙탈 타입이 비어있습니다.");
         }
         
-        FractalCalculator calculator = calculators.get(fractalType.toLowerCase());
+        String type = fractalType.toLowerCase();
+        if (!type.equals("mandelbrot") && !type.equals("julia")) {
+            throw new IllegalArgumentException("지원하지 않는 프랙탈 타입입니다. 만델브로트와 줄리아 집합만 지원됩니다.");
+        }
+        
+        FractalCalculator calculator = calculators.get(type);
         if (calculator == null) {
-            throw new IllegalArgumentException("지원하지 않는 프랙탈 타입입니다: " + fractalType + 
-                    ". 지원되는 타입: " + getSupportedTypes());
+            throw new IllegalArgumentException("지원하지 않는 프랙탈 타입입니다: " + fractalType);
         }
         
         return calculator;

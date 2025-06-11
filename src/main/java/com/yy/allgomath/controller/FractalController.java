@@ -60,6 +60,11 @@ public class FractalController {
             @RequestParam(name = "juliaImag", required = false) Double juliaImag) {
 
         try {
+            // 지원되는 프랙탈 타입 검증
+            if (!type.equalsIgnoreCase("mandelbrot") && !type.equalsIgnoreCase("julia")) {
+                throw new IllegalArgumentException("지원하지 않는 프랙탈 타입입니다. 만델브로트와 줄리아 집합만 지원됩니다.");
+            }
+
             // 줌 레벨에 따른 범위 계산
             double range = 4.0 / zoom;
             double xMin = centerX - range/2;
