@@ -22,6 +22,7 @@ public class WebConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()  // Actuator 추가
                         .anyRequest().authenticated()
                 );
 
@@ -38,6 +39,7 @@ public class WebConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", configuration);
+        
         return source;
     }
 }
