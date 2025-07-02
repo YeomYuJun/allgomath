@@ -19,7 +19,7 @@ management:
       discovery:
         enabled: false
       exposure:
-        include: health, metrics, info
+        include: health, metrics, info, caches
 # Redis ??
 #spring.data.redis.host=localhost
 #spring.data.redis.port=6379
