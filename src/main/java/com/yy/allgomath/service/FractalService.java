@@ -5,6 +5,8 @@ import com.yy.allgomath.fractal.FractalCalculatorFactory;
 import com.yy.allgomath.fractal.FractalParameters;
 import com.yy.allgomath.fractal.calculator.FractalCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,6 +32,11 @@ public class FractalService {
      * @param params 계산 파라미터
      * @return 프랙탈 결과
      */
+    // 기존 메서드에 @Cacheable 추가
+    @Cacheable(value = "fractal",
+            key = "#fractalType + '_' + #params.maxIterations + '_' + " +
+                    "#params.width + '_' + #params.colorScheme + '_' + " +
+                    "#params.smooth + '_' + T(java.util.Objects).hash(#params.xMin, #params.xMax, #params.yMin, #params.yMax)")
     public FractalResult calculateFractal(String fractalType, FractalParameters params) {
         FractalCalculator calculator = calculatorFactory.getCalculator(fractalType);
         double[][] values = calculator.calculate(params);
@@ -156,5 +163,15 @@ public class FractalService {
     public FractalResult calculateBarnsley(double xMin, double xMax, double yMin, double yMax,
                                           int width, int height, int maxIterations) {
         return calculateBarnsley(xMin, xMax, yMin, yMax, width, height, maxIterations, "classic", true);
+    }
+    // 캐시 관리 메서드 추가
+    @CacheEvict(value = "fractal", allEntries = true)
+    public void clearAllCache() {
+        // 전체 캐시 삭제
+    }
+
+    @CacheEvict(value = "fractal", key = "#fractalType + '_*'")
+    public void clearCacheByType(String fractalType) {
+        // 특정 타입 캐시만 삭제
     }
 }

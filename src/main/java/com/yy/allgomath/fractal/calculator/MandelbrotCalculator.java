@@ -2,6 +2,7 @@ package com.yy.allgomath.fractal.calculator;
 
 import com.yy.allgomath.datatype.Complex;
 import com.yy.allgomath.fractal.FractalParameters;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.IntStream;
@@ -11,7 +12,10 @@ import java.util.stream.IntStream;
  */
 @Component
 public class MandelbrotCalculator implements FractalCalculator {
-    
+
+    @Cacheable(value = "mandelbrot",
+            key = "T(java.util.Objects).hash(#params.xMin, #params.xMax, #params.yMin, #params.yMax, " +
+                    "#params.width, #params.height, #params.maxIterations, #params.smooth)")
     @Override
     public double[][] calculate(FractalParameters params) {
         validateParameters(params);
