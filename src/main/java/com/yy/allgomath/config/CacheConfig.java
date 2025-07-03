@@ -20,7 +20,12 @@ public class CacheConfig {
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
         Map<String, RedisCacheConfiguration> cacheConfigurations = Map.of(
-                "fractal", createCacheConfig(Duration.ofHours(1)),
+
+                //일단 fractal 별 다른 TTL 적용
+                "mandelbrot", createCacheConfig(Duration.ofHours(2)),    // zoom에 따른 많은 작용이 있을 거 같음
+                "julia", createCacheConfig(Duration.ofHours(2)),         // 22
+                "fractal", createCacheConfig(Duration.ofHours(1)),       // 통합 캐시
+
                 "fft", createCacheConfig(Duration.ofMinutes(30)),
                 "convex", createCacheConfig(Duration.ofMinutes(45))
         );
