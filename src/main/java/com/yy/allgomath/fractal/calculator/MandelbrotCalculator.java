@@ -13,9 +13,9 @@ import java.util.stream.IntStream;
 @Component
 public class MandelbrotCalculator implements FractalCalculator {
 
-    @Cacheable(value = "mandelbrot",
-            key = "T(java.util.Objects).hash(#params.xMin, #params.xMax, #params.yMin, #params.yMax, " +
-                    "#params.width, #params.height, #params.maxIterations, #params.smooth)")
+//    @Cacheable(value = "mandelbrot",
+//            key = "#params.width + '_' + #params.maxIterations + '_' + #params.smooth")
+    @Cacheable(value = "mandelbrot", key = "#params.width + '_' + #params.maxIterations")
     @Override
     public double[][] calculate(FractalParameters params) {
         validateParameters(params);

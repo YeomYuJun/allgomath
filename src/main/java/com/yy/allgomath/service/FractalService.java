@@ -33,6 +33,7 @@ public class FractalService {
      * @return 프랙탈 결과
      */
     // 기존 메서드에 @Cacheable 추가
+    // Caching 또한
     @Cacheable(value = "fractal",
             key = "#fractalType + '_' + #params.maxIterations + '_' + " +
                     "#params.width + '_' + #params.colorScheme + '_' + " +
