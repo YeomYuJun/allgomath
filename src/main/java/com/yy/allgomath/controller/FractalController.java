@@ -93,7 +93,7 @@ public class FractalController {
             
             // Strategy 패턴으로 계산기 선택 및 실행
             FractalCalculator calculator = getCalculator(type);
-            double[][] values = calculator.calculate(params);
+            double[][] values = calculator.calculateWithCaching(params);
             
             FractalResult result = new FractalResult(resolution, resolution, values, colorScheme, smooth);
             return ResponseEntity.ok(result);
@@ -136,5 +136,36 @@ public class FractalController {
             throw new IllegalArgumentException("지원하지 않는 프랙탈 타입입니다: " + type);
         }
         return calculator;
+    }
+
+    // FractalController에서 테스트
+    @GetMapping("/test-tile-cache")
+    public ResponseEntity<Map<String, Object>> testTileCache() {
+        FractalParameters params = FractalParameters.mandelbrotDefaults()
+                .width(400).height(400)
+                .maxIterations(50)
+                .smooth(true)
+                .build();
+
+
+        FractalCalculator calculator = getCalculator("mandelbrot");
+        // 첫 번째 요청 (Cache Miss)
+        long start1 = System.currentTimeMillis();
+        double[][] result1 = calculator.calculateWithCaching(params);
+        long time1 = System.currentTimeMillis() - start1;
+
+        // 두 번째 요청 (Cache Hit)
+        long start2 = System.currentTimeMillis();
+        double[][] result2 = calculator.calculateWithCaching(params);
+        long time2 = System.currentTimeMillis() - start2;
+
+        Map<String, Object> response = Map.of(
+                "cacheMissTime", time1,
+                "cacheHitTime", time2,
+                "improvement", String.format("%.1f%%", (1 - (double)time2/time1) * 100),
+                "tileCount", (400/32 + 1) * (400/32 + 1)
+        );
+
+        return ResponseEntity.ok(response);
     }
 }

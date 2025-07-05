@@ -28,6 +28,8 @@ public class CacheConfig {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        // ✅ 핵심: 타입 정보 보존을 위한 설정 추가
+        objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
 
         // 다차원 배열 직렬화 지원
         GenericJackson2JsonRedisSerializer serializer =
@@ -42,6 +44,7 @@ public class CacheConfig {
                 "mandelbrot", createCacheConfig(Duration.ofHours(2), serializer),    // zoom에 따른 많은 작용이 있을 거 같음
                 "julia", createCacheConfig(Duration.ofHours(2), serializer),         // 22
                 //"fractal", createCacheConfig(Duration.ofHours(1), serializer),       // 통합 캐시 -> 안쓸 거 같음
+                "mandelbrot_tile", createCacheConfig(Duration.ofHours(3), serializer),
 
                 "fft", createCacheConfig(Duration.ofMinutes(30), serializer),
                 "convex", createCacheConfig(Duration.ofMinutes(45), serializer)
