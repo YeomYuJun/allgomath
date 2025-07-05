@@ -14,6 +14,16 @@ public interface FractalCalculator {
      * @return 각 픽셀의 계산된 값 (double 배열)
      */
     double[][] calculate(FractalParameters params);
+
+
+    /**
+     * 프랙탈을 계산하여 각 픽셀의 값을 반환
+     *
+     * @param params 프랙탈 계산 파라미터
+     * @return 각 픽셀의 계산된 값 (double 배열)
+     */
+    double[][] calculateWithCaching(FractalParameters params);
+
     
     /**
      * 이 계산기가 지원하는 프랙탈 타입 반환

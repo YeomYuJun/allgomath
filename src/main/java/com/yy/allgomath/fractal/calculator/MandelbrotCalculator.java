@@ -2,9 +2,12 @@ package com.yy.allgomath.fractal.calculator;
 
 import com.yy.allgomath.datatype.Complex;
 import com.yy.allgomath.fractal.FractalParameters;
+import com.yy.allgomath.service.TileCacheService;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -12,24 +15,30 @@ import java.util.stream.IntStream;
  */
 @Component
 public class MandelbrotCalculator implements FractalCalculator {
+    //기존 만델브로 캐싱 사이즈가 너무 크기 떄문에 조금 더 상세한 캐싱 유도해야함.
+    private static final int TILE_SIZE = 32; // 32x32 타일
+    private final TileCacheService tileCacheService;
 
-//    @Cacheable(value = "mandelbrot",
-//            key = "#params.width + '_' + #params.maxIterations + '_' + #params.smooth")
-    @Cacheable(value = "mandelbrot", key = "#params.width + '_' + #params.maxIterations")
+    public MandelbrotCalculator(TileCacheService tileCacheService) {
+        this.tileCacheService = tileCacheService;
+    }
+
+
+    //depreacted..될 예정 캐싱 전략 추가해야함.
     @Override
     public double[][] calculate(FractalParameters params) {
         validateParameters(params);
-        
+
         double[][] values = new double[params.getHeight()][params.getWidth()];
-        
+
         // 병렬 처리로 성능 최적화
         IntStream.range(0, params.getHeight()).parallel().forEach(y -> {
             for (int x = 0; x < params.getWidth(); x++) {
                 double real = params.getXMin() + (params.getXMax() - params.getXMin()) * x / params.getWidth();
                 double imag = params.getYMin() + (params.getYMax() - params.getYMin()) * y / params.getHeight();
-                
+
                 Complex c = new Complex(real, imag);
-                
+
                 if (params.isSmooth()) {
                     values[y][x] = calculateSmoothMandelbrot(c, params.getMaxIterations());
                 } else {
@@ -37,9 +46,189 @@ public class MandelbrotCalculator implements FractalCalculator {
                 }
             }
         });
-        
+
         return values;
     }
+
+    //    deprecated 1,2
+    //    version1
+    //    @Cacheable(value = "mandelbrot",
+    //            key = "#params.width + '_' + #params.maxIterations + '_' + #params.smooth")
+    //    version2
+    //    @Cacheable(value = "mandelbrot", key = "#params.width + '_' + #params.maxIterations")
+    @Override
+    public double[][] calculateWithCaching(FractalParameters params) {
+        System.out.println("🔍 calculateWithCaching 시작 - 해상도: " + params.getWidth() + "x" + params.getHeight());
+
+        try {
+            validateParameters(params);
+
+            double[][] values = new double[params.getHeight()][params.getWidth()];
+            System.out.println("✅ 빈 배열 생성 완료");
+
+            int tilesX = (params.getWidth() + TILE_SIZE - 1) / TILE_SIZE;
+            int tilesY = (params.getHeight() + TILE_SIZE - 1) / TILE_SIZE;
+            System.out.println("📐 타일 계산: " + tilesX + "x" + tilesY + " = " + (tilesX * tilesY) + "개");
+
+            List<TileResult> tileResults = IntStream.range(0, tilesX * tilesY)
+                    .parallel()
+                    .mapToObj(tileIndex -> {
+                        int tileX = tileIndex % tilesX;
+                        int tileY = tileIndex / tilesX;
+
+                        try {
+                            double tileXMin = calculateTileXMin(params, tileX);
+                            double tileYMin = calculateTileYMin(params, tileY);
+                            double tileXMax = calculateTileXMax(params, tileX);
+                            double tileYMax = calculateTileYMax(params, tileY);
+                            double[][] tileValues = tileCacheService.calculateTile(
+                                    params, tileXMin, tileYMin, tileXMax, tileYMax);
+                            if (tileValues == null) {
+                                System.err.println("❌ 타일 계산 결과가 null: " + tileX + ", " + tileY);
+                                return null;
+                            }
+                            return new TileResult(tileX, tileY, tileValues);
+                        } catch (Exception e) {
+                            System.err.println("❌ 타일 계산 오류 (" + tileX + ", " + tileY + "): " + e.getMessage());
+                            e.printStackTrace();
+                            return null;
+                        }
+                    })
+                    .filter(result -> result != null) // null 결과 제거
+                    .toList();
+
+            System.out.println("✅ 타일 계산 완료: " + tileResults.size() + "/" + (tilesX * tilesY));
+
+            // 타일 복사
+            tileResults.forEach(result -> {
+                try {
+                    copyTileToArray(values, result.values, result.tileX, result.tileY, params);
+                } catch (Exception e) {
+                    System.err.println("❌ 타일 복사 오류: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            });
+
+            System.out.println("✅ calculateWithCaching 완료");
+            return values;
+
+        } catch (Exception e) {
+            System.err.println("🚨 calculateWithCaching 전체 오류: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    // 타일 결과를 담는 내부 클래스
+    private static class TileResult {
+        final int tileX;
+        final int tileY;
+        final double[][] values;
+
+        TileResult(int tileX, int tileY, double[][] values) {
+            this.tileX = tileX;
+            this.tileY = tileY;
+            this.values = values;
+        }
+    }
+
+    @Cacheable(value = "mandelbrot_tile",
+            key = "#params.maxIterations + '_' + #params.smooth + '_' + " +
+                    "T(Math).round(calculateTileXMin(#params, #tileX) * 10000) + '_' + " +
+                    "T(Math).round(calculateTileYMin(#params, #tileY) * 10000)")
+    public double[][] calculateTileCached(FractalParameters params, int tileX, int tileY) {
+        // 32x32 타일 계산
+        double[][] tileValues = new double[TILE_SIZE][TILE_SIZE];
+
+        double tileXMin = calculateTileXMin(params, tileX);
+        double tileYMin = calculateTileYMin(params, tileY);
+        double tileXStep = (params.getXMax() - params.getXMin()) / params.getWidth() * TILE_SIZE;
+        double tileYStep = (params.getYMax() - params.getYMin()) / params.getHeight() * TILE_SIZE;
+
+        for (int y = 0; y < TILE_SIZE; y++) {
+            for (int x = 0; x < TILE_SIZE; x++) {
+                double real = tileXMin + x * tileXStep / TILE_SIZE;
+                double imag = tileYMin + y * tileYStep / TILE_SIZE;
+
+                Complex c = new Complex(real, imag);
+
+                if (params.isSmooth()) {
+                    tileValues[y][x] = calculateSmoothMandelbrot(c, params.getMaxIterations());
+                } else {
+                    tileValues[y][x] = calculateMandelbrot(c, params.getMaxIterations());
+                }
+            }
+        }
+
+        return tileValues;
+    }
+
+    /**
+     * 타일의 X 좌표 최소값 계산
+     */
+    public double calculateTileXMin(FractalParameters params, int tileX) {
+        double totalWidth = params.getXMax() - params.getXMin();
+        double tileWidth = totalWidth / Math.ceil((double)params.getWidth() / TILE_SIZE);
+        return params.getXMin() + tileX * tileWidth;
+    }
+
+    /**
+     * 타일의 X 좌표 최대값 계산
+     */
+    public double calculateTileXMax(FractalParameters params, int tileX) {
+        double totalWidth = params.getXMax() - params.getXMin();
+        double tileWidth = totalWidth / Math.ceil((double)params.getWidth() / TILE_SIZE);
+        return params.getXMin() + (tileX + 1) * tileWidth;
+    }
+
+    /**
+     * 타일의 Y 좌표 최소값 계산
+     */
+    public double calculateTileYMin(FractalParameters params, int tileY) {
+        double totalHeight = params.getYMax() - params.getYMin();
+        double tileHeight = totalHeight / Math.ceil((double)params.getHeight() / TILE_SIZE);
+        return params.getYMin() + tileY * tileHeight;
+    }
+
+    /**
+     * 타일의 Y 좌표 최대값 계산
+     */
+    public double calculateTileYMax(FractalParameters params, int tileY) {
+        double totalHeight = params.getYMax() - params.getYMin();
+        double tileHeight = totalHeight / Math.ceil((double)params.getHeight() / TILE_SIZE);
+        return params.getYMin() + (tileY + 1) * tileHeight;
+    }
+
+    /**
+     * 타일 결과를 전체 배열에 복사
+     */
+    private void copyTileToArray(double[][] targetArray, double[][] tileValues,
+                                 int tileX, int tileY, FractalParameters params) {
+
+        int startX = tileX * TILE_SIZE;
+        int startY = tileY * TILE_SIZE;
+
+        int endX = Math.min(startX + TILE_SIZE, params.getWidth());
+        int endY = Math.min(startY + TILE_SIZE, params.getHeight());
+
+        for (int y = startY; y < endY; y++) {
+            for (int x = startX; x < endX; x++) {
+                int tileLocalX = x - startX;
+                int tileLocalY = y - startY;
+
+                // 배열 경계 체크
+                if (tileLocalX < TILE_SIZE && tileLocalY < TILE_SIZE) {
+                    targetArray[y][x] = tileValues[tileLocalY][tileLocalX];
+                }
+            }
+        }
+    }
+
+
+
+
+
+
+
     
     @Override
     public String getSupportedType() {

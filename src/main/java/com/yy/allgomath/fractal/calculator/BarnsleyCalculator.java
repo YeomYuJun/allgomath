@@ -30,7 +30,12 @@ public class BarnsleyCalculator implements FractalCalculator {
         
         return hitCounts;
     }
-    
+
+    @Override
+    public double[][] calculateWithCaching(FractalParameters params) {
+        return new double[0][];
+    }
+
     @Override
     public String getSupportedType() {
         return "barnsley";
