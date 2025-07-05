@@ -37,18 +37,16 @@ management:
         enabled: false
       exposure:
         include: health, metrics, info, caches
-# Redis ??
-#spring.data.redis.host=localhost
-#spring.data.redis.port=6379
-#spring.data.redis.password=1234
-#spring.data.redis.database=0
-#spring.data.redis.timeout=60000
-#spring.data.redis.jedis.pool.max-active=8
-#spring.data.redis.jedis.pool.max-idle=8
-#spring.data.redis.jedis.pool.min-idle=0
-#spring.data.redis.jedis.pool.max-wait=-1ms
 
-# ?? ?? ??
-#spring.cache.redis.time-to-live=3600000
-# TTL? 1???? ?? (??? ??)
-#spring.cache.redis.cache-null-values=false
+
+#logging
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: DEBUG
+    org.springframework.cache: DEBUG
+    com.yy.algorithm.fractal: DEBUG
+    org.springframework.data.redis: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
