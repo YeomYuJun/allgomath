@@ -1,6 +1,7 @@
 package com.yy.allgomath.fractal.calculator;
 
 import com.yy.allgomath.datatype.Complex;
+import com.yy.allgomath.datatype.TileData;
 import com.yy.allgomath.fractal.FractalParameters;
 import com.yy.allgomath.service.TileCacheService;
 import org.springframework.cache.annotation.Cacheable;
@@ -15,7 +16,7 @@ import java.util.stream.IntStream;
  */
 @Component
 public class MandelbrotCalculator implements FractalCalculator {
-    //기존 만델브로 캐싱 사이즈가 너무 크기 떄문에 조금 더 상세한 캐싱 유도해야함.
+    //기존 만델브로 캐싱 사이즈가 너무 크기 떄문에 조금 더 상세한 캐싱 유도해야함. => 32
     private static final int TILE_SIZE = 32; // 32x32 타일
     private final TileCacheService tileCacheService;
 
@@ -64,11 +65,11 @@ public class MandelbrotCalculator implements FractalCalculator {
             validateParameters(params);
 
             double[][] values = new double[params.getHeight()][params.getWidth()];
-            System.out.println("✅ 빈 배열 생성 완료");
+            System.out.println("빈 배열 생성 완료");
 
             int tilesX = (params.getWidth() + TILE_SIZE - 1) / TILE_SIZE;
             int tilesY = (params.getHeight() + TILE_SIZE - 1) / TILE_SIZE;
-            System.out.println("📐 타일 계산: " + tilesX + "x" + tilesY + " = " + (tilesX * tilesY) + "개");
+            System.out.println("타일 계산: " + tilesX + "x" + tilesY + " = " + (tilesX * tilesY) + "개");
 
             List<TileResult> tileResults = IntStream.range(0, tilesX * tilesY)
                     .parallel()
@@ -81,15 +82,17 @@ public class MandelbrotCalculator implements FractalCalculator {
                             double tileYMin = calculateTileYMin(params, tileY);
                             double tileXMax = calculateTileXMax(params, tileX);
                             double tileYMax = calculateTileYMax(params, tileY);
-                            double[][] tileValues = tileCacheService.calculateTile(
+
+                            TileData tileData = tileCacheService.calculateTile(
                                     params, tileXMin, tileYMin, tileXMax, tileYMax);
+                            double[][] tileValues = tileData.getValues();
                             if (tileValues == null) {
-                                System.err.println("❌ 타일 계산 결과가 null: " + tileX + ", " + tileY);
+                                System.err.println("타일 계산 결과가 null: " + tileX + ", " + tileY);
                                 return null;
                             }
-                            return new TileResult(tileX, tileY, tileValues);
+                            return new TileResult(tileX, tileY, tileData);
                         } catch (Exception e) {
-                            System.err.println("❌ 타일 계산 오류 (" + tileX + ", " + tileY + "): " + e.getMessage());
+                            System.err.println("타일 계산 오류 (" + tileX + ", " + tileY + "): " + e.getMessage());
                             e.printStackTrace();
                             return null;
                         }
@@ -97,23 +100,23 @@ public class MandelbrotCalculator implements FractalCalculator {
                     .filter(result -> result != null) // null 결과 제거
                     .toList();
 
-            System.out.println("✅ 타일 계산 완료: " + tileResults.size() + "/" + (tilesX * tilesY));
+            System.out.println("타일 계산 완료: " + tileResults.size() + "/" + (tilesX * tilesY));
 
             // 타일 복사
             tileResults.forEach(result -> {
                 try {
-                    copyTileToArray(values, result.values, result.tileX, result.tileY, params);
+                    copyTileToArray(values, result.tileData.getValues(), result.tileX, result.tileY, params);
                 } catch (Exception e) {
-                    System.err.println("❌ 타일 복사 오류: " + e.getMessage());
+                    System.err.println("타일 복사 오류: " + e.getMessage());
                     e.printStackTrace();
                 }
             });
 
-            System.out.println("✅ calculateWithCaching 완료");
+            System.out.println("calculateWithCaching 완료");
             return values;
 
         } catch (Exception e) {
-            System.err.println("🚨 calculateWithCaching 전체 오류: " + e.getMessage());
+            System.err.println("calculateWithCaching 전체 오류: " + e.getMessage());
             e.printStackTrace();
             throw e;
         }
@@ -122,12 +125,12 @@ public class MandelbrotCalculator implements FractalCalculator {
     private static class TileResult {
         final int tileX;
         final int tileY;
-        final double[][] values;
+        final TileData tileData;
 
-        TileResult(int tileX, int tileY, double[][] values) {
+        TileResult(int tileX, int tileY, TileData tileData) {
             this.tileX = tileX;
             this.tileY = tileY;
-            this.values = values;
+            this.tileData = tileData;
         }
     }
 

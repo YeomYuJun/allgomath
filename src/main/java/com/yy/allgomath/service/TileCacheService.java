@@ -1,6 +1,7 @@
 package com.yy.allgomath.service;
 
 import com.yy.allgomath.datatype.Complex;
+import com.yy.allgomath.datatype.TileData;
 import com.yy.allgomath.fractal.FractalParameters;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
@@ -9,11 +10,12 @@ import org.springframework.stereotype.Component;
 public class TileCacheService {
     private static final int PRECISION = 10000; // 소수점 4자리까지
 
+    //DTO 타입으로 래핑
     @Cacheable(value = "mandelbrot_tile",
             key = "#params.maxIterations + '_' + #params.smooth + '_' + " +
                     "T(Math).round(#tileXMin * " + PRECISION + ") + '_' + " +
                     "T(Math).round(#tileYMin * " + PRECISION + ")")
-    public double[][] calculateTile(FractalParameters params,
+    public TileData  calculateTile(FractalParameters params,
                                     double tileXMin, double tileYMin,
                                     double tileXMax, double tileYMax) {
         double[][] tileValues = new double[32][32];
@@ -36,7 +38,7 @@ public class TileCacheService {
             }
         }
 
-        return tileValues;
+        return new TileData(tileValues);
     }
 
     private double calculateMandelbrot(Complex c, int maxIterations) {
