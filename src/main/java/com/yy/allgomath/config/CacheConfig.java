@@ -24,11 +24,11 @@ public class CacheConfig {
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
 
         //직렬화 이슈로 인한 추가사항
-        // 커스텀 ObjectMapper 설정
+        //커스텀 ObjectMapper 설정
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        // ✅ 핵심: 타입 정보 보존을 위한 설정 추가
+        //핵심: 타입 정보 보존을 위한 설정 추가
         objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
 
         // 다차원 배열 직렬화 지원

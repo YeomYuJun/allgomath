@@ -59,7 +59,7 @@ public class MandelbrotCalculator implements FractalCalculator {
     //    @Cacheable(value = "mandelbrot", key = "#params.width + '_' + #params.maxIterations")
     @Override
     public double[][] calculateWithCaching(FractalParameters params) {
-        System.out.println("🔍 calculateWithCaching 시작 - 해상도: " + params.getWidth() + "x" + params.getHeight());
+        System.out.println("calculateWithCaching 시작 - 해상도: " + params.getWidth() + "x" + params.getHeight());
 
         try {
             validateParameters(params);

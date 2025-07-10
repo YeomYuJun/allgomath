@@ -14,7 +14,10 @@ public class TileCacheService {
     @Cacheable(value = "mandelbrot_tile",
             key = "#params.maxIterations + '_' + #params.smooth + '_' + " +
                     "T(Math).round(#tileXMin * " + PRECISION + ") + '_' + " +
-                    "T(Math).round(#tileYMin * " + PRECISION + ")")
+                    "T(Math).round(#tileYMin * " + PRECISION + ") + '_' + " +
+                    "T(Math).round(#tileXMax * " + PRECISION + ") + '_' + " +
+                    "T(Math).round(#tileYMax * " + PRECISION + ")"
+    )
     public TileData  calculateTile(FractalParameters params,
                                     double tileXMin, double tileYMin,
                                     double tileXMax, double tileYMax) {
