@@ -3,6 +3,7 @@ package com.yy.allgomath.controller;
 import com.yy.allgomath.datatype.FractalResult;
 import com.yy.allgomath.fractal.FractalParameters;
 import com.yy.allgomath.fractal.calculator.FractalCalculator;
+import io.micrometer.core.annotation.Timed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,6 +47,7 @@ public class FractalController {
      * @param juliaImag 줄리아 집합의 경우 사용할 허수부 (선택적)
      * @return ResponseEntity<FractalResult> 계산된 프랙탈 데이터와 HTTP 상태 코드를 담은 응답
      */
+    @Timed(description = "프랙탈 API 응답 시간")
     @GetMapping("/generate")
     public ResponseEntity<FractalResult> generateFractal(
             @RequestParam(name = "type") String type,

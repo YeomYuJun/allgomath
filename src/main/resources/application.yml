@@ -36,7 +36,17 @@ management:
       discovery:
         enabled: false
       exposure:
-        include: health, metrics, info, caches
+        include: health, metrics, info, caches, prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+      percentiles-histogram:
+        http.server.requests: true
+
 
 
 #logging
