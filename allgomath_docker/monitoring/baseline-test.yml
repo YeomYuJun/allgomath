@@ -1,0 +1,12 @@
+config:
+  target: http://localhost:8080
+  phases:
+    - duration: 300  # 지속시간 sec
+      arrivalRate: 2  # 초당 요청 값
+      name: "기준선 측정"
+
+scenarios:
+  - name: "프랙탈 생성"
+    flow:
+      - get:
+          url: "/api/fractal/generate?type=mandelbrot&iterations=100&resolution=400"
