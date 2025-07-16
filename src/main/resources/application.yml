@@ -38,14 +38,21 @@ management:
       exposure:
         include: health, metrics, info, caches, prometheus
   metrics:
-    export:
-      prometheus:
-        enabled: true
     distribution:
       percentiles:
         http.server.requests: 0.5, 0.95, 0.99
       percentiles-histogram:
         http.server.requests: true
+    enable:
+      jvm: true
+      system : true
+      tomcat : true
+      http : true
+      web.server : true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 
 
 

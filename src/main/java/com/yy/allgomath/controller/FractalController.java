@@ -3,7 +3,9 @@ package com.yy.allgomath.controller;
 import com.yy.allgomath.datatype.FractalResult;
 import com.yy.allgomath.fractal.FractalParameters;
 import com.yy.allgomath.fractal.calculator.FractalCalculator;
+import com.yy.allgomath.monitoring.AlgorithmPerformanceMetrics;
 import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,15 +23,17 @@ import java.util.stream.Collectors;
 public class FractalController {
 
     private final Map<String, FractalCalculator> calculators;
+    private final AlgorithmPerformanceMetrics metrics;
 
     @Autowired
-    public FractalController(List<FractalCalculator> calculatorList) {
+    public FractalController(List<FractalCalculator> calculatorList, AlgorithmPerformanceMetrics metrics) {
         // Strategy 패턴: 모든 FractalCalculator를 타입별로 Map에 저장
         this.calculators = calculatorList.stream()
                 .collect(Collectors.toMap(
                     FractalCalculator::getSupportedType,
                     Function.identity()
                 ));
+        this.metrics = metrics;
     }
 
     /**
@@ -47,7 +51,7 @@ public class FractalController {
      * @param juliaImag 줄리아 집합의 경우 사용할 허수부 (선택적)
      * @return ResponseEntity<FractalResult> 계산된 프랙탈 데이터와 HTTP 상태 코드를 담은 응답
      */
-    @Timed(description = "프랙탈 API 응답 시간")
+    @Timed(value = "fractal.api.response.time", description = "프랙탈 API 응답 시간")
     @GetMapping("/generate")
     public ResponseEntity<FractalResult> generateFractal(
             @RequestParam(name = "type") String type,
@@ -61,6 +65,7 @@ public class FractalController {
             @RequestParam(name = "juliaReal", required = false) Double juliaReal,
             @RequestParam(name = "juliaImag", required = false) Double juliaImag) {
 
+        Timer.Sample sample = metrics.startFractalTimer();
         try {
             // 지원되는 프랙탈 타입 검증
             if (!type.equalsIgnoreCase("mandelbrot") && !type.equalsIgnoreCase("julia")) {
@@ -98,10 +103,15 @@ public class FractalController {
             double[][] values = calculator.calculateWithCaching(params);
             
             FractalResult result = new FractalResult(resolution, resolution, values, colorScheme, smooth);
+
+            metrics.recordFractalTime(sample, type);
+
             return ResponseEntity.ok(result);
         } catch (IllegalArgumentException e) {
+            metrics.recordFractalTime(sample, type);
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
+            metrics.recordFractalTime(sample, type);
             return ResponseEntity.internalServerError().build();
         }
     }
