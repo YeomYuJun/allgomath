@@ -58,68 +58,68 @@ public class MandelbrotCalculator implements FractalCalculator {
     //    version2
     //    @Cacheable(value = "mandelbrot", key = "#params.width + '_' + #params.maxIterations")
     @Override
-    public double[][] calculateWithCaching(FractalParameters params) {
-        System.out.println("calculateWithCaching 시작 - 해상도: " + params.getWidth() + "x" + params.getHeight());
+        public double[][] calculateWithCaching(FractalParameters params) {
+            System.out.println("calculateWithCaching 시작 - 해상도: " + params.getWidth() + "x" + params.getHeight());
 
-        try {
-            validateParameters(params);
+            try {
+                validateParameters(params);
 
-            double[][] values = new double[params.getHeight()][params.getWidth()];
-            System.out.println("빈 배열 생성 완료");
+                double[][] values = new double[params.getHeight()][params.getWidth()];
+                System.out.println("빈 배열 생성 완료");
 
-            int tilesX = (params.getWidth() + TILE_SIZE - 1) / TILE_SIZE;
-            int tilesY = (params.getHeight() + TILE_SIZE - 1) / TILE_SIZE;
-            System.out.println("타일 계산: " + tilesX + "x" + tilesY + " = " + (tilesX * tilesY) + "개");
+                int tilesX = (params.getWidth() + TILE_SIZE - 1) / TILE_SIZE;
+                int tilesY = (params.getHeight() + TILE_SIZE - 1) / TILE_SIZE;
+                System.out.println("타일 계산: " + tilesX + "x" + tilesY + " = " + (tilesX * tilesY) + "개");
 
-            List<TileResult> tileResults = IntStream.range(0, tilesX * tilesY)
-                    .parallel()
-                    .mapToObj(tileIndex -> {
-                        int tileX = tileIndex % tilesX;
-                        int tileY = tileIndex / tilesX;
+                List<TileResult> tileResults = IntStream.range(0, tilesX * tilesY)
+                        .parallel()
+                        .mapToObj(tileIndex -> {
+                            int tileX = tileIndex % tilesX;
+                            int tileY = tileIndex / tilesX;
 
-                        try {
-                            double tileXMin = calculateTileXMin(params, tileX);
-                            double tileYMin = calculateTileYMin(params, tileY);
-                            double tileXMax = calculateTileXMax(params, tileX);
-                            double tileYMax = calculateTileYMax(params, tileY);
+                            try {
+                                double tileXMin = calculateTileXMin(params, tileX);
+                                double tileYMin = calculateTileYMin(params, tileY);
+                                double tileXMax = calculateTileXMax(params, tileX);
+                                double tileYMax = calculateTileYMax(params, tileY);
 
-                            TileData tileData = tileCacheService.calculateTile(
-                                    params, tileXMin, tileYMin, tileXMax, tileYMax);
-                            double[][] tileValues = tileData.getValues();
-                            if (tileValues == null) {
-                                System.err.println("타일 계산 결과가 null: " + tileX + ", " + tileY);
+                                TileData tileData = tileCacheService.calculateTile(
+                                        params, tileXMin, tileYMin, tileXMax, tileYMax);
+                                double[][] tileValues = tileData.getValues();
+                                if (tileValues == null) {
+                                    System.err.println("타일 계산 결과가 null: " + tileX + ", " + tileY);
+                                    return null;
+                                }
+                                return new TileResult(tileX, tileY, tileData);
+                            } catch (Exception e) {
+                                System.err.println("타일 계산 오류 (" + tileX + ", " + tileY + "): " + e.getMessage());
+                                e.printStackTrace();
                                 return null;
                             }
-                            return new TileResult(tileX, tileY, tileData);
-                        } catch (Exception e) {
-                            System.err.println("타일 계산 오류 (" + tileX + ", " + tileY + "): " + e.getMessage());
-                            e.printStackTrace();
-                            return null;
-                        }
-                    })
-                    .filter(result -> result != null) // null 결과 제거
-                    .toList();
+                        })
+                        .filter(result -> result != null) // null 결과 제거
+                        .toList();
 
-            System.out.println("타일 계산 완료: " + tileResults.size() + "/" + (tilesX * tilesY));
+                System.out.println("타일 계산 완료: " + tileResults.size() + "/" + (tilesX * tilesY));
 
-            // 타일 복사
-            tileResults.forEach(result -> {
-                try {
-                    copyTileToArray(values, result.tileData.getValues(), result.tileX, result.tileY, params);
-                } catch (Exception e) {
-                    System.err.println("타일 복사 오류: " + e.getMessage());
-                    e.printStackTrace();
-                }
-            });
+                // 타일 복사
+                tileResults.forEach(result -> {
+                    try {
+                        copyTileToArray(values, result.tileData.getValues(), result.tileX, result.tileY, params);
+                    } catch (Exception e) {
+                        System.err.println("타일 복사 오류: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                });
 
-            System.out.println("calculateWithCaching 완료");
-            return values;
+                System.out.println("calculateWithCaching 완료");
+                return values;
 
-        } catch (Exception e) {
-            System.err.println("calculateWithCaching 전체 오류: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
-        }
+            } catch (Exception e) {
+                System.err.println("calculateWithCaching 전체 오류: " + e.getMessage());
+                e.printStackTrace();
+                throw e;
+            }
     }
     // 타일 결과를 담는 내부 클래스
     private static class TileResult {

@@ -21,6 +21,8 @@ public class TileCacheService {
     public TileData  calculateTile(FractalParameters params,
                                     double tileXMin, double tileYMin,
                                     double tileXMax, double tileYMax) {
+        System.out.println("===== calculateTile 메서드 실제 호출됨 (캐시 미스) =====");
+        System.out.println("캐시 키 생성 대상 파라미터: " + params.getMaxIterations() + ", " + params.isSmooth());
         double[][] tileValues = new double[32][32];
 
         double pixelXStep = (tileXMax - tileXMin) / 32;
@@ -40,7 +42,7 @@ public class TileCacheService {
                 }
             }
         }
-
+        System.out.println("===== calculateTile 계산 완료, TileData 반환 =====");
         return new TileData(tileValues);
     }
 

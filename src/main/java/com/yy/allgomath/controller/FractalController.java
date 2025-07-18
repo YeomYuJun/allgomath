@@ -1,5 +1,6 @@
 package com.yy.allgomath.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yy.allgomath.datatype.FractalResult;
 import com.yy.allgomath.fractal.FractalParameters;
 import com.yy.allgomath.fractal.calculator.FractalCalculator;
@@ -24,9 +25,10 @@ public class FractalController {
 
     private final Map<String, FractalCalculator> calculators;
     private final AlgorithmPerformanceMetrics metrics;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public FractalController(List<FractalCalculator> calculatorList, AlgorithmPerformanceMetrics metrics) {
+    public FractalController(List<FractalCalculator> calculatorList, AlgorithmPerformanceMetrics metrics, ObjectMapper objectMapper) {
         // Strategy 패턴: 모든 FractalCalculator를 타입별로 Map에 저장
         this.calculators = calculatorList.stream()
                 .collect(Collectors.toMap(
@@ -34,6 +36,7 @@ public class FractalController {
                     Function.identity()
                 ));
         this.metrics = metrics;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -67,6 +70,8 @@ public class FractalController {
 
         Timer.Sample sample = metrics.startFractalTimer();
         try {
+            long totalStart = System.currentTimeMillis();
+
             // 지원되는 프랙탈 타입 검증
             if (!type.equalsIgnoreCase("mandelbrot") && !type.equalsIgnoreCase("julia")) {
                 throw new IllegalArgumentException("지원하지 않는 프랙탈 타입입니다. 만델브로트와 줄리아 집합만 지원됩니다.");
@@ -100,10 +105,30 @@ public class FractalController {
             
             // Strategy 패턴으로 계산기 선택 및 실행
             FractalCalculator calculator = getCalculator(type);
-            double[][] values = calculator.calculateWithCaching(params);
-            
-            FractalResult result = new FractalResult(resolution, resolution, values, colorScheme, smooth);
 
+            long calcStart = System.currentTimeMillis();
+            double[][] values = calculator.calculateWithCaching(params);
+            long calcEnd = System.currentTimeMillis();
+
+
+            long resultStart = System.currentTimeMillis();
+            FractalResult result = new FractalResult(resolution, resolution, values, colorScheme, smooth);
+            long resultEnd = System.currentTimeMillis();
+
+
+            long serStart = System.currentTimeMillis();
+            String json = objectMapper.writeValueAsString(result);
+            long serEnd = System.currentTimeMillis();
+
+            long totalEnd = System.currentTimeMillis();
+
+
+            System.out.println("=== 성능 분석 ===");
+            System.out.println("프랙탈 계산: " + (calcEnd - calcStart) + "ms");
+            System.out.println("FractalResult 생성: " + (resultEnd - resultStart) + "ms");
+            System.out.println("JSON 직렬화: " + (serEnd - serStart) + "ms");
+            System.out.println("전체 시간: " + (totalEnd - totalStart) + "ms");
+            System.out.println("미확인 오버헤드: " + (totalEnd - totalStart - (calcEnd - calcStart) - (resultEnd - resultStart) - (serEnd - serStart)) + "ms");
             metrics.recordFractalTime(sample, type);
 
             return ResponseEntity.ok(result);

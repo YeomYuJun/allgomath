@@ -20,8 +20,13 @@ import java.util.Map;
 @EnableCaching
 public class CacheConfig {
 
+    public CacheConfig() {
+        System.out.println("===== CacheConfig 생성자 호출됨 =====");
+    }
+
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+        System.out.println("===== RedisCacheManager 빈 생성 시작 =====");
 
         //직렬화 이슈로 인한 추가사항
         //커스텀 ObjectMapper 설정
