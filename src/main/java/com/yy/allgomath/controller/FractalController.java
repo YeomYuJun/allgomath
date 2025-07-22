@@ -8,16 +8,25 @@ import com.yy.allgomath.monitoring.AlgorithmPerformanceMetrics;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import javax.imageio.ImageIO;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.io.IOException;
+
 
 @RestController
 @RequestMapping("/api/fractal")
@@ -38,6 +47,62 @@ public class FractalController {
         this.metrics = metrics;
         this.objectMapper = objectMapper;
     }
+
+    @GetMapping("/generate/image")
+    public ResponseEntity<byte[]> generateFractalImage(
+            @RequestParam(name = "type") String type,
+            @RequestParam(name = "iterations") int iterations,
+            @RequestParam(name = "resolution") int resolution,
+            @RequestParam(name = "colorScheme", defaultValue = "classic") String colorScheme,
+            @RequestParam(name = "smooth", defaultValue = "true") boolean smooth,
+            @RequestParam(name = "centerX", defaultValue = "0.0") double centerX,
+            @RequestParam(name = "centerY", defaultValue = "0.0") double centerY,
+            @RequestParam(name = "zoom", defaultValue = "1.0") double zoom,
+            @RequestParam(name = "juliaReal", required = false) Double juliaReal,
+            @RequestParam(name = "juliaImag", required = false) Double juliaImag) {
+
+        Timer.Sample sample = metrics.startFractalTimer();
+        try {
+            FractalResult result = generateFractalData(type, iterations, resolution, colorScheme, smooth, centerX, centerY, zoom, juliaReal, juliaImag);
+            
+            byte[] pngData = convertToPng(result.getPixels(), resolution, resolution);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.IMAGE_PNG);
+            
+            metrics.recordFractalTime(sample, type);
+            return new ResponseEntity<>(pngData, headers, HttpStatus.OK);
+
+        } catch (IllegalArgumentException e) {
+            metrics.recordFractalTime(sample, type);
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            metrics.recordFractalTime(sample, type);
+            e.printStackTrace(); // Log the exception for debugging
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    private byte[] convertToPng(byte[] pixels, int width, int height) throws IOException {
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
+        byte[] abgr = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+        // RGBA -> ABGR 변환
+        for (int i = 0; i < width * height; i++) {
+            int r = pixels[i * 4] & 0xFF;
+            int g = pixels[i * 4 + 1] & 0xFF;
+            int b = pixels[i * 4 + 2] & 0xFF;
+            int a = pixels[i * 4 + 3] & 0xFF;
+            abgr[i * 4]     = (byte) a;
+            abgr[i * 4 + 1] = (byte) b;
+            abgr[i * 4 + 2] = (byte) g;
+            abgr[i * 4 + 3] = (byte) r;
+        }
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            ImageIO.write(image, "png", baos);
+            return baos.toByteArray();
+        }
+    }
+
 
     /**
      * 통합 프랙탈 생성 API (Strategy 패턴 적용)
@@ -70,67 +135,8 @@ public class FractalController {
 
         Timer.Sample sample = metrics.startFractalTimer();
         try {
-            long totalStart = System.currentTimeMillis();
-
-            // 지원되는 프랙탈 타입 검증
-            if (!type.equalsIgnoreCase("mandelbrot") && !type.equalsIgnoreCase("julia")) {
-                throw new IllegalArgumentException("지원하지 않는 프랙탈 타입입니다. 만델브로트와 줄리아 집합만 지원됩니다.");
-            }
-
-            // 줌 레벨에 따른 범위 계산
-            double range = 4.0 / zoom;
-            double xMin = centerX - range/2;
-            double xMax = centerX + range/2;
-            double yMin = centerY - range/2;
-            double yMax = centerY + range/2;
-
-            // 프랙탈 타입에 따른 매개변수 빌더 생성
-            FractalParameters.FractalParametersBuilder builder = FractalParameters.defaults()
-                    .xMin(xMin).xMax(xMax)
-                    .yMin(yMin).yMax(yMax)
-                    .width(resolution).height(resolution)
-                    .maxIterations(iterations)
-                    .colorScheme(colorScheme)
-                    .smooth(smooth);
-
-            // 줄리아 집합 특별 처리
-            if ("julia".equalsIgnoreCase(type)) {
-                if (juliaReal == null || juliaImag == null) {
-                    throw new IllegalArgumentException("줄리아 집합의 경우 juliaReal과 juliaImag 파라미터가 필요합니다.");
-                }
-                builder.cReal(juliaReal).cImag(juliaImag);
-            }
-
-            FractalParameters params = builder.build();
-            
-            // Strategy 패턴으로 계산기 선택 및 실행
-            FractalCalculator calculator = getCalculator(type);
-
-            long calcStart = System.currentTimeMillis();
-            double[][] values = calculator.calculateWithCaching(params);
-            long calcEnd = System.currentTimeMillis();
-
-
-            long resultStart = System.currentTimeMillis();
-            FractalResult result = new FractalResult(resolution, resolution, values, colorScheme, smooth);
-            long resultEnd = System.currentTimeMillis();
-
-
-            long serStart = System.currentTimeMillis();
-            String json = objectMapper.writeValueAsString(result);
-            long serEnd = System.currentTimeMillis();
-
-            long totalEnd = System.currentTimeMillis();
-
-
-            System.out.println("=== 성능 분석 ===");
-            System.out.println("프랙탈 계산: " + (calcEnd - calcStart) + "ms");
-            System.out.println("FractalResult 생성: " + (resultEnd - resultStart) + "ms");
-            System.out.println("JSON 직렬화: " + (serEnd - serStart) + "ms");
-            System.out.println("전체 시간: " + (totalEnd - totalStart) + "ms");
-            System.out.println("미확인 오버헤드: " + (totalEnd - totalStart - (calcEnd - calcStart) - (resultEnd - resultStart) - (serEnd - serStart)) + "ms");
+            FractalResult result = generateFractalData(type, iterations, resolution, colorScheme, smooth, centerX, centerY, zoom, juliaReal, juliaImag);
             metrics.recordFractalTime(sample, type);
-
             return ResponseEntity.ok(result);
         } catch (IllegalArgumentException e) {
             metrics.recordFractalTime(sample, type);
@@ -139,6 +145,70 @@ public class FractalController {
             metrics.recordFractalTime(sample, type);
             return ResponseEntity.internalServerError().build();
         }
+    }
+    
+    private FractalResult generateFractalData(String type, int iterations, int resolution, String colorScheme, boolean smooth, double centerX, double centerY, double zoom, Double juliaReal, Double juliaImag) throws com.fasterxml.jackson.core.JsonProcessingException {
+        long totalStart = System.currentTimeMillis();
+
+        // 지원되는 프랙탈 타입 검증
+        if (!type.equalsIgnoreCase("mandelbrot") && !type.equalsIgnoreCase("julia")) {
+            throw new IllegalArgumentException("지원하지 않는 프랙탈 타입입니다. 만델브로트와 줄리아 집합만 지원됩니다.");
+        }
+
+        // 줌 레벨에 따른 범위 계산
+        double range = 4.0 / zoom;
+        double xMin = centerX - range/2;
+        double xMax = centerX + range/2;
+        double yMin = centerY - range/2;
+        double yMax = centerY + range/2;
+
+        // 프랙탈 타입에 따른 매개변수 빌더 생성
+        FractalParameters.FractalParametersBuilder builder = FractalParameters.defaults()
+                .xMin(xMin).xMax(xMax)
+                .yMin(yMin).yMax(yMax)
+                .width(resolution).height(resolution)
+                .maxIterations(iterations)
+                .colorScheme(colorScheme)
+                .smooth(smooth);
+
+        // 줄리아 집합 특별 처리
+        if ("julia".equalsIgnoreCase(type)) {
+            if (juliaReal == null || juliaImag == null) {
+                throw new IllegalArgumentException("줄리아 집합의 경우 juliaReal과 juliaImag 파라미터가 필요합니다.");
+            }
+            builder.cReal(juliaReal).cImag(juliaImag);
+        }
+
+        FractalParameters params = builder.build();
+        
+        // Strategy 패턴으로 계산기 선택 및 실행
+        FractalCalculator calculator = getCalculator(type);
+
+        long calcStart = System.currentTimeMillis();
+        double[][] values = calculator.calculateWithCaching(params);
+        long calcEnd = System.currentTimeMillis();
+
+
+        long resultStart = System.currentTimeMillis();
+        FractalResult result = new FractalResult(resolution, resolution, values, colorScheme, smooth);
+        long resultEnd = System.currentTimeMillis();
+
+
+        long serStart = System.currentTimeMillis();
+        String json = objectMapper.writeValueAsString(result);
+        long serEnd = System.currentTimeMillis();
+
+        long totalEnd = System.currentTimeMillis();
+
+
+        System.out.println("=== 성능 분석 ===");
+        System.out.println("프랙탈 계산: " + (calcEnd - calcStart) + "ms");
+        System.out.println("FractalResult 생성: " + (resultEnd - resultStart) + "ms");
+        System.out.println("JSON 직렬화: " + (serEnd - serStart) + "ms");
+        System.out.println("전체 시간: " + (totalEnd - totalStart) + "ms");
+        System.out.println("미확인 오버헤드: " + (totalEnd - totalStart - (calcEnd - calcStart) - (resultEnd - resultStart) - (serEnd - serStart)) + "ms");
+        
+        return result;
     }
 
     /**

@@ -19,6 +19,12 @@ spring:
     redis:
       time-to-live: 3600000  # 1시간
 
+server:
+  compression:
+    enabled: true                           # 압축 활성화
+    min-response-size: 1024                # 1KB 이상 응답만 압축
+    mime-types: application/json           # JSON 응답만 압축
+
 
 #임시 비활성화
 management:
