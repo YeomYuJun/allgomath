@@ -21,5 +21,22 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
 
+  redis:
+    image: redis:alpine
+    container_name: allgomath-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: redis-exporter
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+
 volumes:
   grafana_data:
+  redis_data:
