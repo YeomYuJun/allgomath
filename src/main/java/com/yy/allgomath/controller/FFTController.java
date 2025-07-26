@@ -94,7 +94,9 @@ public class FFTController {
             request.getSamplingRate()
         );
 
-        FrequencyDomainResult fftResult = fftService.computeFFT(signal);
+        //캐싱 전략으로 전환
+        //FrequencyDomainResult fftResult = fftService.computeFFT(signal);
+        FrequencyDomainResult fftResult = fftService.computeFFTWithCache(signal);
 
         // 피크 검출
         List<FrequencyPeak> peaks = fftService.detectFrequencyPeaks(fftResult, request.getPeakThreshold());

@@ -1,7 +1,10 @@
 package com.yy.allgomath.service;
 
+import com.yy.allgomath.cache.service.FFTCacheService;
 import com.yy.allgomath.datatype.*;
 import com.yy.allgomath.fft.*;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -9,6 +12,35 @@ import java.util.stream.Collectors;
 
 @Service
 public class FFTService {
+
+    @Autowired
+    private FFTCacheService fftCacheService;
+    
+    
+    /**
+     * 캐시 조회 후 계산    
+     * @param signal 입력 시간 도메인 신호 (TimeDomainSignal 객체)
+     * @return 주파수 도메인 결과 (FrequencyDomainResult 객체)
+     */
+    public FrequencyDomainResult computeFFTWithCache(TimeDomainSignal signal) {
+        String cacheKey = makeFFTCacheKey(signal);
+
+        // 1. 캐시 조회
+        FrequencyDomainResult cached = (FrequencyDomainResult) fftCacheService.get(cacheKey);
+        if (cached != null) {
+            return cached;
+        }
+
+        // 2. 캐시에 없으면 계산
+        FrequencyDomainResult result = computeFFT(signal);
+
+        // 3. 캐시에 저장
+        fftCacheService.set(cacheKey, result);
+
+        return result;
+    }
+
+    
 
     /**
      * 시간 도메인 신호에 FFT를 적용하여 주파수 도메인 결과를 계산.
@@ -636,5 +668,39 @@ public class FFTService {
         }
         return totalEnergy;
     }
+
+    /*
+     * 캐시 키 생성
+     */
+    private String makeFFTCacheKey(TimeDomainSignal signal) {
+        // 신호+샘플링레이트 직렬화 후 SHA-256 해시
+        StringBuilder sb = new StringBuilder();
+        for (double v : signal.getRealValues()) {
+            sb.append(v).append(",");
+        }
+        sb.append("|").append(signal.getSamplingRate());
+        // 필요시 duration 등 추가
+        return "fft:" + sha256(sb.toString());
+    }
+
+    /*
+     * SHA-256 해시 생성
+     */
+    private String sha256(String input) {
+        try {
+            java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(input.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if(hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
 }
