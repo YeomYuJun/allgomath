@@ -13,6 +13,13 @@ import java.util.Map;
 @RequestMapping("/api/fft")
 public class FFTController {
 
+    /*
+     * 
+     * analyze-realtime 에서 캐싱 전략으로 전환 테스트 결과 
+     * 현재 FFT 연산에서 캐싱이 당장 필요해보이지 않는 것으로 결론..
+     * freqeuncy-sweep 제외 20ms 정도 소요되는 것으로 보임
+     */
+
     private final FFTService fftService;
 
     public FFTController(FFTService fftService) {
