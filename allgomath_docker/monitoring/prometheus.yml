@@ -8,6 +8,14 @@ scrape_configs:
       # 도커 네트워크라면 서비스명:포트 >> - targets: ['allgomath:8080']
     metrics_path: '/actuator/prometheus'
     scrape_interval: 5s
+  
   - job_name: 'redis'
     static_configs:
       - targets: ['redis-exporter:9121']
+  
+  # JMeter 메트릭 수집 추가
+  - job_name: 'jmeter'
+    static_configs:
+      - targets: ['host.docker.internal:9270']
+    scrape_interval: 5s
+    metrics_path: '/metrics'

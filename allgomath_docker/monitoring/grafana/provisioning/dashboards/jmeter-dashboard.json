@@ -1,0 +1,267 @@
+{
+  "id": null,
+  "title": "JMeter Load Test Dashboard",
+  "tags": ["jmeter", "load-test", "performance"],
+  "timezone": "browser",
+  "panels": [
+    {
+      "id": 1,
+      "title": "JMeter Response Time",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "jmeter_response_time_seconds",
+          "legendFormat": "{{method}} {{path}}"
+        }
+      ],
+      "yAxes": [
+        {
+          "label": "Response Time (seconds)",
+          "min": 0
+        }
+      ],
+      "xAxis": {
+        "mode": "time"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": 2,
+      "title": "JMeter Request Rate (RPS)",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "rate(jmeter_requests_total[1m])",
+          "legendFormat": "{{method}} {{path}}"
+        }
+      ],
+      "yAxes": [
+        {
+          "label": "Requests per Second",
+          "min": 0
+        }
+      ],
+      "xAxis": {
+        "mode": "time"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      }
+    },
+    {
+      "id": 3,
+      "title": "JMeter Error Rate",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "rate(jmeter_errors_total[1m])",
+          "legendFormat": "{{method}} {{path}}"
+        }
+      ],
+      "yAxes": [
+        {
+          "label": "Errors per Second",
+          "min": 0
+        }
+      ],
+      "xAxis": {
+        "mode": "time"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      }
+    },
+    {
+      "id": 4,
+      "title": "JMeter Active Threads",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "jmeter_active_threads",
+          "legendFormat": "Active Threads"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 8
+      }
+    },
+    {
+      "id": 5,
+      "title": "JMeter Total Requests",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "jmeter_requests_total",
+          "legendFormat": "Total Requests"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 16
+      }
+    },
+    {
+      "id": 6,
+      "title": "JMeter Total Errors",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "jmeter_errors_total",
+          "legendFormat": "Total Errors"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 16
+      }
+    },
+    {
+      "id": 7,
+      "title": "JMeter Bytes Received",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "jmeter_bytes_received_total",
+          "legendFormat": "Bytes Received"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 16
+      }
+    },
+    {
+      "id": 8,
+      "title": "Application Response Time (P95)",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket[5m]))",
+          "legendFormat": "P95 Response Time"
+        }
+      ],
+      "yAxes": [
+        {
+          "label": "Response Time (seconds)",
+          "min": 0
+        }
+      ],
+      "xAxis": {
+        "mode": "time"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 20
+      }
+    },
+    {
+      "id": 9,
+      "title": "Application Request Rate",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "rate(http_server_requests_seconds_count[1m])",
+          "legendFormat": "Requests/sec"
+        }
+      ],
+      "yAxes": [
+        {
+          "label": "Requests per Second",
+          "min": 0
+        }
+      ],
+      "xAxis": {
+        "mode": "time"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 20
+      }
+    },
+    {
+      "id": 10,
+      "title": "JVM Memory Usage",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "jvm_memory_used_bytes{area=\"heap\"}",
+          "legendFormat": "Heap Used"
+        },
+        {
+          "expr": "jvm_memory_max_bytes{area=\"heap\"}",
+          "legendFormat": "Heap Max"
+        }
+      ],
+      "yAxes": [
+        {
+          "label": "Memory (bytes)",
+          "min": 0
+        }
+      ],
+      "xAxis": {
+        "mode": "time"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 28
+      }
+    },
+    {
+      "id": 11,
+      "title": "Redis Cache Performance",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "redis_commands_processed_total",
+          "legendFormat": "Redis Commands"
+        }
+      ],
+      "yAxes": [
+        {
+          "label": "Commands",
+          "min": 0
+        }
+      ],
+      "xAxis": {
+        "mode": "time"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 28
+      }
+    }
+  ],
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "refresh": "5s"
+} 
