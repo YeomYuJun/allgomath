@@ -1,0 +1,106 @@
+version: '3.8'
+services:
+  # Spring Boot Application 추가
+  allgomath-api:
+    build:
+      context: ..  # allgomath 루트 디렉토리
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - JAVA_OPTS=-Xms1g -Xmx2g -XX:+UseG1GC -XX:MaxGCPauseMillis=200
+    depends_on:
+      - redis
+    networks:
+      - allgomath-network
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  # 기존 Redis (그대로 유지)
+  redis:
+    image: redis:alpine
+    container_name: allgomath-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./monitoring/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - allgomath-network
+    restart: unless-stopped
+
+  # 기존 Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - allgomath-network
+    restart: unless-stopped
+
+  # 기존 Grafana
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_INSTALL_PLUGINS=redis-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - allgomath-network
+    restart: unless-stopped
+
+  # 기존 Redis Exporter
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: redis-exporter
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - allgomath-network
+    restart: unless-stopped
+
+  # Nginx 추가 (리버스 프록시용)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - allgomath-api
+    networks:
+      - allgomath-network
+    restart: unless-stopped
+
+volumes:
+  grafana_data:
+  redis_data:
+  prometheus_data:
+
+networks:
+  allgomath-network:
+    driver: bridge

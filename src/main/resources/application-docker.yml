@@ -1,0 +1,72 @@
+spring:
+  application:
+    name: allgomath
+    
+  # Redis 설정 (Docker 컨테이너용)
+  data:
+    redis:
+      host: redis  # Docker 컨테이너 네트워크에서 서비스명 사용
+      port: 6379
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+  # 캐시 설정
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000  # 1시간
+
+server:
+  compression:
+    enabled: true
+    min-response-size: 1024
+    mime-types: application/json
+
+# 액추에이터 설정 (모니터링용)
+management:
+  health:
+    redis:
+      enabled: true
+
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, info, caches, prometheus
+        
+  metrics:
+    distribution:
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+      percentiles-histogram:
+        http.server.requests: true
+    enable:
+      jvm: true
+      system: true
+      tomcat: true
+      http: true
+      web.server: true
+      
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+# 로깅 설정 (Docker 환경용)
+logging:
+  level:
+    root: INFO
+    org.springframework.web: DEBUG
+    org.springframework.cache: DEBUG
+    com.yy.allgomath: DEBUG
+    org.springframework.data.redis: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: /app/logs/allgomath.log
+    max-size: 100MB
+    max-history: 30
