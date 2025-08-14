@@ -69,7 +69,18 @@ public class FractalController {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.IMAGE_PNG);
-            
+            headers.setContentLength(pngData.length);
+            headers.setCacheControl("no-cache, no-store, max-age=0, must-revalidate");
+
+            headers.add("Access-Control-Allow-Origin", "*");
+            headers.add("Access-Control-Allow-Methods", "GET, OPTIONS");
+            headers.add("Access-Control-Allow-Headers", "Content-Type");
+            headers.add("Access-Control-Expose-Headers", "Content-Type, Content-Length");
+
+            //추가 보안 헤더
+            headers.add("X-Content-Type-Options", "nosniff");
+
+
             metrics.recordFractalTime(sample, type);
             return new ResponseEntity<>(pngData, headers, HttpStatus.OK);
 

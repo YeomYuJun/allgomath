@@ -32,19 +32,21 @@ public class WebConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:5173",        // 로컬 개발용
-                "https://allgomath.com",        // 프로덕션 도메인
-                "https://d2qbdf5fpx2lej.cloudfront.net", // CloudFront
-                "https://api.allgomath.com"     // API 도메인 (혹시 모를 직접 접근)
-        ));
+        // 모든 Origin 허용으로 디버깅 (임시)
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        // configuration.setAllowedOrigins(Arrays.asList(
+        //         "http://localhost:5173",        // 로컬 개발용
+        //         "https://allgomath.com",        // 프로덕션 도메인
+        //         "https://d2qbdf5fpx2lej.cloudfront.net", // CloudFront
+        //         "https://api.allgomath.com"     // API 도메인 (혹시 모를 직접 접근)
+        // ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         //configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowedHeaders(Arrays.asList("*")); // 모든 헤더 허용
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", configuration);
+        source.registerCorsConfiguration("/**", configuration); // 모든 경로에 CORS 적용
         
         return source;
     }
