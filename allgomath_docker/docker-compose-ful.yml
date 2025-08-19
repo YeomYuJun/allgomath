@@ -9,7 +9,7 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_HOST=allgomath-redis
       - SPRING_REDIS_PORT=6379
       - JAVA_OPTS=-Xms1g -Xmx2g -XX:+UseG1GC -XX:MaxGCPauseMillis=200
     depends_on:
