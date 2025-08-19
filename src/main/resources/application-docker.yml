@@ -5,7 +5,7 @@ spring:
   # Redis 설정 (Docker 컨테이너용)
   data:
     redis:
-      host: redis  # Docker 컨테이너 네트워크에서 서비스명 사용
+      host: allgomath-redis  # Docker 컨테이너 네트워크에서 서비스명 사용
       port: 6379
       timeout: 2000ms
       lettuce:
