@@ -11,7 +11,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATA_REDIS_HOST=allgomath-redis
       - SPRING_DATA_REDIS_PORT=6379
-      - JAVA_OPTS=-Xms1g -Xmx2g -XX:+UseG1GC -XX:MaxGCPauseMillis=200
+      - JAVA_OPTS=-Xms1g -Xmx2g -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Dspring.data.redis.host=allgomath-redis -Dspring.data.redis.port=6379
     depends_on:
       - redis
     networks:
