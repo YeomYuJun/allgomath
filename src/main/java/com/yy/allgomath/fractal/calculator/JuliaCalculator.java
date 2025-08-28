@@ -45,7 +45,9 @@ public class JuliaCalculator implements FractalCalculator {
 
     @Override
     public double[][] calculateWithCaching(FractalParameters params) {
-        return new double[0][];
+        // 현재 줄리아 계산은 별도의 타일 캐싱을 사용하지 않으므로
+        // 기본 계산 로직을 그대로 위임하여 일관된 결과를 반환한다.
+        return calculate(params);
     }
 
     @Override
