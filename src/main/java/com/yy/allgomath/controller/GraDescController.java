@@ -117,15 +117,27 @@ public class GraDescController {
             case "standard":
                 // f(x,y) = x² - y²
                 return Math.pow(x, 2) - Math.pow(y, 2);
-            case "monkey":
-                // f(x,y) = x³ - 3xy²
-                return Math.pow(x, 3) - 3 * x * Math.pow(y, 2);
-            case "cubic":
-                // f(x,y) = x⁴ - y⁴
-                return Math.pow(x, 4) - Math.pow(y, 4);
-            case "triangle":
-                // f(x,y) = x5 - y5
-                return Math.pow(x, 5) - Math.pow(y, 5);
+            case "paraboloid":
+                // f(x,y) = x² + y² (단순한 볼록 함수)
+                return Math.pow(x, 2) + Math.pow(y, 2);
+            case "rosenbrock":
+                // f(x,y) = (1-x)² + 100(y-x²)² (로젠브록 함수)
+                return Math.pow(1 - x, 2) + 100 * Math.pow(y - Math.pow(x, 2), 2);
+            case "himmelblau":
+                // f(x,y) = (x²+y-11)² + (x+y²-7)² (힘멜블라우 함수)
+                return Math.pow(Math.pow(x, 2) + y - 11, 2) + Math.pow(x + Math.pow(y, 2) - 7, 2);
+            case "beale":
+                // f(x,y) = (1.5-x+xy)² + (2.25-x+xy²)² + (2.625-x+xy³)² (빌 함수)
+                return Math.pow(1.5 - x + x * y, 2) + Math.pow(2.25 - x + x * Math.pow(y, 2), 2) + Math.pow(2.625 - x + x * Math.pow(y, 3), 2);
+            // case "monkey":
+            //     // f(x,y) = x³ - 3xy² (몽키 새들)
+            //     return Math.pow(x, 3) - 3 * x * Math.pow(y, 2);
+            // case "cubic":
+            //     // f(x,y) = x⁴ - y⁴
+            //     return Math.pow(x, 4) - Math.pow(y, 4);
+            // case "triangle":
+            //     // f(x,y) = x5 - y5
+            //     return Math.pow(x, 5) - Math.pow(y, 5);
             default:
                 // 기본값: standard
                 return Math.pow(x, 2) - Math.pow(y, 2);
@@ -150,18 +162,39 @@ public class GraDescController {
                 gradX = 2 * x;      // df/dx = 2x
                 gradY = -2 * y;     // df/dy = -2y
                 break;
-            case "monkey":   // f(x,y) = x³ - 3xy²
-                gradX = 3 * Math.pow(x, 2) - 3 * Math.pow(y, 2); // df/dx = 3x² - 3y²
-                gradY = -6 * x * y;                              // df/dy = -6xy
+            case "paraboloid": // f(x,y) = x² + y²
+                gradX = 2 * x;      // df/dx = 2x
+                gradY = 2 * y;      // df/dy = 2y
                 break;
-            case "cubic":    // f(x,y) = x⁴ - y⁴
-                gradX = 4 * Math.pow(x, 3); // df/dx = 4x³
-                gradY = -4 * Math.pow(y, 3);// df/dy = -4y³
+            case "rosenbrock": // f(x,y) = (1-x)² + 100(y-x²)²
+                gradX = -2 * (1 - x) - 400 * x * (y - Math.pow(x, 2)); // df/dx = -2(1-x) - 400x(y-x²)
+                gradY = 200 * (y - Math.pow(x, 2));                    // df/dy = 200(y-x²)
                 break;
-            case "triangle": // f(x,y) = x⁵ - y⁵
-                gradX = 5 * Math.pow(x, 4); // df/dx = 5x⁴
-                gradY = -5 * Math.pow(y, 4);// df/dy = -5y⁴
+            case "himmelblau": // f(x,y) = (x²+y-11)² + (x+y²-7)²
+                double term1 = 2 * (Math.pow(x, 2) + y - 11);
+                double term2 = 2 * (x + Math.pow(y, 2) - 7);
+                gradX = term1 * 2 * x + term2;     // df/dx = 2(x²+y-11)2x + 2(x+y²-7)
+                gradY = term1 + term2 * 2 * y;     // df/dy = 2(x²+y-11) + 2(x+y²-7)2y
                 break;
+            case "beale": // f(x,y) = (1.5-x+xy)² + (2.25-x+xy²)² + (2.625-x+xy³)²
+                double beale1 = 2 * (1.5 - x + x * y);
+                double beale2 = 2 * (2.25 - x + x * Math.pow(y, 2));
+                double beale3 = 2 * (2.625 - x + x * Math.pow(y, 3));
+                gradX = beale1 * (-1 + y) + beale2 * (-1 + Math.pow(y, 2)) + beale3 * (-1 + Math.pow(y, 3)); // df/dx
+                gradY = beale1 * x + beale2 * 2 * x * y + beale3 * 3 * x * Math.pow(y, 2);                   // df/dy
+                break;
+            // case "monkey":   // f(x,y) = x³ - 3xy²
+            //     gradX = 3 * Math.pow(x, 2) - 3 * Math.pow(y, 2); // df/dx = 3x² - 3y²
+            //     gradY = -6 * x * y;                              // df/dy = -6xy
+            //     break;
+            // case "cubic":    // f(x,y) = x⁴ - y⁴
+            //     gradX = 4 * Math.pow(x, 3); // df/dx = 4x³
+            //     gradY = -4 * Math.pow(y, 3);// df/dy = -4y³
+            //     break;
+            // case "triangle": // f(x,y) = x⁵ - y⁵
+            //     gradX = 5 * Math.pow(x, 4); // df/dx = 5x⁴
+            //     gradY = -5 * Math.pow(y, 4);// df/dy = -5y⁴
+            //     break;
             default: // 기본값: standard
                 gradX = 2 * x;
                 gradY = -2 * y;

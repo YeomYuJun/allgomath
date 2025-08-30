@@ -175,6 +175,21 @@ public class ConvexFunctionController {
             case "himmelblau":
                 // f(x,y) = (x² + y - 11)² + (x + y² - 7)² (Himmelblau 함수)
                 return Math.pow(Math.pow(x, 2) + y - 11, 2) + Math.pow(x + Math.pow(y, 2) - 7, 2);
+            case "gentle_bowl":
+                // f(x,y) = 0.1(x² + y²) (부드러운 그릇 모양)
+                return 0.1 * (Math.pow(x, 2) + Math.pow(y, 2));
+            case "gentle_elliptic":
+                // f(x,y) = 0.05x² + 0.1y² (부드러운 타원형 그릇)
+                return 0.05 * Math.pow(x, 2) + 0.1 * Math.pow(y, 2);
+            case "gentle_exp":
+                // f(x,y) = 0.02*(x² + y²) + 0.001*e^(0.1*(x² + y²))
+                return 0.02 * (Math.pow(x, 2) + Math.pow(y, 2)) + 0.001 * Math.exp(0.1 * (Math.pow(x, 2) + Math.pow(y, 2)));
+            case "saddle_gentle":
+                // f(x,y) = 0.1x² - 0.05y² (부드러운 안장점)
+                return 0.1 * Math.pow(x, 2) - 0.05 * Math.pow(y, 2);
+            case "ripple":
+                // f(x,y) = 0.1(x² + y²) + 0.2*sin(x)*sin(y) (물결 모양)
+                return 0.1 * (Math.pow(x, 2) + Math.pow(y, 2)) + 0.2 * Math.sin(x) * Math.sin(y);
             default:
                 // 기본값: 이차 볼록 함수
                 return Math.pow(x, 2) + Math.pow(y, 2);
@@ -218,6 +233,28 @@ public class ConvexFunctionController {
                         term1 * 2 * x + term2,
                         term1 + term2 * 2 * y
                 };
+            case "gentle_bowl":
+                // ∇f(x,y) = [0.2x, 0.2y]
+                return new double[]{0.2 * x, 0.2 * y};
+            case "gentle_elliptic":
+                // ∇f(x,y) = [0.1x, 0.2y]
+                return new double[]{0.1 * x, 0.2 * y};
+            case "gentle_exp":
+                // ∇f(x,y) = [0.04x + 0.0002x*e^(0.1*(x² + y²)), 0.04y + 0.0002y*e^(0.1*(x² + y²))]
+                double gentleExpTerm = Math.exp(0.1 * (Math.pow(x, 2) + Math.pow(y, 2)));
+                return new double[]{
+                        0.04 * x + 0.0002 * x * gentleExpTerm,
+                        0.04 * y + 0.0002 * y * gentleExpTerm
+                };
+            case "saddle_gentle":
+                // ∇f(x,y) = [0.2x, -0.1y]
+                return new double[]{0.2 * x, -0.1 * y};
+            case "ripple":
+                // ∇f(x,y) = [0.2x + 0.2*cos(x)*sin(y), 0.2y + 0.2*sin(x)*cos(y)]
+                return new double[]{
+                        0.2 * x + 0.2 * Math.cos(x) * Math.sin(y),
+                        0.2 * y + 0.2 * Math.sin(x) * Math.cos(y)
+                };
             default:
                 // 기본값: 이차 볼록 함수
                 return new double[]{2 * x, 2 * y};
@@ -247,6 +284,21 @@ public class ConvexFunctionController {
             case "himmelblau":
                 // 여러 개의 지역 최소값 존재 (주된 최소값만 반환)
                 return new double[]{3, 2, 0};
+            case "gentle_bowl":
+                // 최소값: (0,0), 값: 0
+                return new double[]{0, 0, 0};
+            case "gentle_elliptic":
+                // 최소값: (0,0), 값: 0
+                return new double[]{0, 0, 0};
+            case "gentle_exp":
+                // 최소값: (0,0), 값: 0
+                return new double[]{0, 0, 0};
+            case "saddle_gentle":
+                // 안장점: (0,0), 값: 0 (x 방향으로는 최소, y 방향으로는 최대)
+                return new double[]{0, 0, 0};
+            case "ripple":
+                // 최소값: (0,0), 값: 0 (주요 최소값)
+                return new double[]{0, 0, 0};
             default:
                 // 기본값: 이차 볼록 함수
                 return new double[]{0, 0, 0};
@@ -272,6 +324,16 @@ public class ConvexFunctionController {
                 return new double[]{802, 200}; // (1,1) 근처에서의 근사값
             case "himmelblau":
                 return new double[]{42, 26}; // (3,2) 근처에서의 근사값
+            case "gentle_bowl":
+                return new double[]{0.2, 0.2};
+            case "gentle_elliptic":
+                return new double[]{0.1, 0.2};
+            case "gentle_exp":
+                return new double[]{0.04, 0.04}; // 원점에서의 근사값
+            case "saddle_gentle":
+                return new double[]{0.2, -0.1}; // 안장점: 한 방향은 양수, 다른 방향은 음수
+            case "ripple":
+                return new double[]{0.2, 0.2}; // 원점에서의 근사값 (물결 효과 무시)
             default:
                 return new double[]{2, 2};
         }
@@ -287,6 +349,11 @@ public class ConvexFunctionController {
             case "exponential": return Integer.MAX_VALUE; // 무한 차수
             case "rosenbrock": return 4;
             case "himmelblau": return 4;
+            case "gentle_bowl": return 2;
+            case "gentle_elliptic": return 2;
+            case "gentle_exp": return Integer.MAX_VALUE; // 무한 차수 (지수 함수 포함)
+            case "saddle_gentle": return 2;
+            case "ripple": return Integer.MAX_VALUE; // 무한 차수 (삼각 함수 포함)
             default: return 2;
         }
     }
@@ -301,6 +368,11 @@ public class ConvexFunctionController {
             case "exponential": return "Exponential Function";
             case "rosenbrock": return "Rosenbrock Function";
             case "himmelblau": return "Himmelblau Function";
+            case "gentle_bowl": return "Gentle Bowl Function";
+            case "gentle_elliptic": return "Gentle Elliptic Function";
+            case "gentle_exp": return "Gentle Exponential Function";
+            case "saddle_gentle": return "Gentle Saddle Function";
+            case "ripple": return "Ripple Function";
             default: return "Unknown Function";
         }
     }
@@ -315,6 +387,11 @@ public class ConvexFunctionController {
             case "exponential": return "f(x,y) = e^(0.1*(x² + y²)) - 1";
             case "rosenbrock": return "f(x,y) = 100(y - x²)² + (1 - x)²";
             case "himmelblau": return "f(x,y) = (x² + y - 11)² + (x + y² - 7)²";
+            case "gentle_bowl": return "f(x,y) = 0.1(x² + y²)";
+            case "gentle_elliptic": return "f(x,y) = 0.05x² + 0.1y²";
+            case "gentle_exp": return "f(x,y) = 0.02*(x² + y²) + 0.001*e^(0.1*(x² + y²))";
+            case "saddle_gentle": return "f(x,y) = 0.1x² - 0.05y²";
+            case "ripple": return "f(x,y) = 0.1(x² + y²) + 0.2*sin(x)*sin(y)";
             default: return "Unknown Formula";
         }
     }
