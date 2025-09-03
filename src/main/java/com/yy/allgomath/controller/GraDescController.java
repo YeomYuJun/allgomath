@@ -76,25 +76,84 @@ public class GraDescController {
         double currentX = startX;
         double currentY = startY;
 
+        // 발산 방지 파라미터
+        final double GRAD_NORM_MAX = 1e3;      // 그래디언트 클리핑 한계
+        final double STEP_NORM_MAX = 1.0;      // 스텝 크기 상한
+        final double COORD_ABS_MAX = 1e3;      // 좌표 한계 넘어가면 중단
+        final int LINESEARCH_MAX_TRIES = 5;    // 백트래킹 시도 횟수
+
+        // 로젠브록/빌은 기본 러닝레이트를 낮춤
+        double lr = learningRate;
+        if ("rosenbrock".equalsIgnoreCase(functionType) || "beale".equalsIgnoreCase(functionType)) {
+            lr = Math.min(lr, 0.01);
+        }
+
         for (int i = 0; i <= maxIterations; i++) {
             double currentZ = calculateZ(currentX, currentY, functionType);
             double[] gradients = calculateGradient(currentX, currentY, functionType);
             double gradX = gradients[0];
             double gradY = gradients[1];
 
+            // 수치 가드: NaN/Inf 즉시 종료
+            if (!Double.isFinite(currentZ) || !Double.isFinite(gradX) || !Double.isFinite(gradY)) {
+                break;
+            }
+
             path.add(new GradientStep(i, currentX, currentY, currentZ, gradX, gradY));
 
             if (i == maxIterations) break; // 마지막 스텝은 위치만 기록하고 업데이트 안 함
 
-            // 경사 하강법 업데이트 규칙
-            currentX = currentX - learningRate * gradX;
-            currentY = currentY - learningRate * gradY;
+            // 그래디언트 클리핑
+            double gradNorm = Math.hypot(gradX, gradY);
+            if (gradNorm > GRAD_NORM_MAX) {
+                double scale = GRAD_NORM_MAX / gradNorm;
+                gradX *= scale;
+                gradY *= scale;
+            }
+
+            // 기본 스텝
+            double stepX = lr * gradX;
+            double stepY = lr * gradY;
+            // 스텝 크기 제한
+            double stepNorm = Math.hypot(stepX, stepY);
+            if (stepNorm > STEP_NORM_MAX) {
+                double scale = STEP_NORM_MAX / stepNorm;
+                stepX *= scale;
+                stepY *= scale;
+            }
+
+            // 백트래킹 라인서치: 손실이 줄어드는 t를 찾는다
+            double t = 1.0;
+            double nextX = currentX - t * stepX;
+            double nextY = currentY - t * stepY;
+            double nextZ = calculateZ(nextX, nextY, functionType);
+            int tries = 0;
+            while (tries < LINESEARCH_MAX_TRIES && (!Double.isFinite(nextZ) || nextZ > currentZ)) {
+                t *= 0.5;
+                nextX = currentX - t * stepX;
+                nextY = currentY - t * stepY;
+                nextZ = calculateZ(nextX, nextY, functionType);
+                tries++;
+            }
+
+            // 라인서치 실패 혹은 수치 이상 시 중단
+            if (!Double.isFinite(nextZ) || nextZ > currentZ) {
+                break;
+            }
+
+            currentX = nextX;
+            currentY = nextY;
+
+            // 좌표 한계 체크
+            if (Math.abs(currentX) > COORD_ABS_MAX || Math.abs(currentY) > COORD_ABS_MAX) {
+                break;
+            }
 
             // (선택적) 수렴 조건: 그래디언트 크기가 매우 작으면 중단
-            if (Math.sqrt(gradX * gradX + gradY * gradY) < 1e-5) {
-                // 다음 스텝 (수렴된 위치)을 한 번 더 기록하고 종료할 수도 있음
-                currentZ = calculateZ(currentX, currentY, functionType);
-                path.add(new GradientStep(i + 1, currentX, currentY, currentZ, 0, 0)); // 그래디언트 0으로 표시
+            double newGradNorm = Math.hypot(gradX, gradY);
+            if (newGradNorm < 1e-6) {
+                double zAt = calculateZ(currentX, currentY, functionType);
+                path.add(new GradientStep(i + 1, currentX, currentY, zAt, 0, 0));
                 break;
             }
         }
@@ -129,15 +188,9 @@ public class GraDescController {
             case "beale":
                 // f(x,y) = (1.5-x+xy)² + (2.25-x+xy²)² + (2.625-x+xy³)² (빌 함수)
                 return Math.pow(1.5 - x + x * y, 2) + Math.pow(2.25 - x + x * Math.pow(y, 2), 2) + Math.pow(2.625 - x + x * Math.pow(y, 3), 2);
-            // case "monkey":
-            //     // f(x,y) = x³ - 3xy² (몽키 새들)
-            //     return Math.pow(x, 3) - 3 * x * Math.pow(y, 2);
-            // case "cubic":
-            //     // f(x,y) = x⁴ - y⁴
-            //     return Math.pow(x, 4) - Math.pow(y, 4);
-            // case "triangle":
-            //     // f(x,y) = x5 - y5
-            //     return Math.pow(x, 5) - Math.pow(y, 5);
+            case "monkey":
+                // f(x,y) = x³ - 3xy² (몽키 새들)
+                return Math.pow(x, 3) - 3 * x * Math.pow(y, 2);
             default:
                 // 기본값: standard
                 return Math.pow(x, 2) - Math.pow(y, 2);
@@ -183,18 +236,10 @@ public class GraDescController {
                 gradX = beale1 * (-1 + y) + beale2 * (-1 + Math.pow(y, 2)) + beale3 * (-1 + Math.pow(y, 3)); // df/dx
                 gradY = beale1 * x + beale2 * 2 * x * y + beale3 * 3 * x * Math.pow(y, 2);                   // df/dy
                 break;
-            // case "monkey":   // f(x,y) = x³ - 3xy²
-            //     gradX = 3 * Math.pow(x, 2) - 3 * Math.pow(y, 2); // df/dx = 3x² - 3y²
-            //     gradY = -6 * x * y;                              // df/dy = -6xy
-            //     break;
-            // case "cubic":    // f(x,y) = x⁴ - y⁴
-            //     gradX = 4 * Math.pow(x, 3); // df/dx = 4x³
-            //     gradY = -4 * Math.pow(y, 3);// df/dy = -4y³
-            //     break;
-            // case "triangle": // f(x,y) = x⁵ - y⁵
-            //     gradX = 5 * Math.pow(x, 4); // df/dx = 5x⁴
-            //     gradY = -5 * Math.pow(y, 4);// df/dy = -5y⁴
-            //     break;
+            case "monkey":   // f(x,y) = x³ - 3xy²
+                gradX = 3 * Math.pow(x, 2) - 3 * Math.pow(y, 2); // df/dx = 3x² - 3y²
+                gradY = -6 * x * y;                              // df/dy = -6xy
+                break;
             default: // 기본값: standard
                 gradX = 2 * x;
                 gradY = -2 * y;
