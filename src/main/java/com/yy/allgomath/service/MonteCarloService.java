@@ -37,17 +37,19 @@ public class MonteCarloService {
             
             try {
                 double functionValue = function.evaluate(x, y);
-                boolean inside = !Double.isNaN(functionValue) && functionValue >= 0;
+                boolean inside = determineInside(request.getFunctionType(), x, y, functionValue);
                 
                 if (inside) {
                     insideCount++;
-                    sum += functionValue;
+                    if (!Double.isNaN(functionValue)) {
+                        sum += functionValue;
+                    }
                 }
                 
                 points.add(new MonteCarloPoint(x, y, functionValue, inside));
                 
                 if ((i + 1) % 10 == 0) {
-                    double currentEstimate = (sum / (i + 1)) * area;
+                    double currentEstimate = ((double) insideCount / (i + 1)) * area;
                     convergenceHistory.add(currentEstimate);
                 }
                 
@@ -55,16 +57,48 @@ public class MonteCarloService {
                 points.add(new MonteCarloPoint(x, y, Double.NaN, false));
                 
                 if ((i + 1) % 10 == 0) {
-                    double currentEstimate = (sum / (i + 1)) * area;
+                    double currentEstimate = ((double) insideCount / (i + 1)) * area;
                     convergenceHistory.add(currentEstimate);
                 }
             }
         }
         
-        double estimate = (sum / request.getIterations()) * area;
+        double estimate = ((double) insideCount / request.getIterations()) * area;
         double actualValue = function.getActualIntegral(xMin, xMax, yMin, yMax);
         
         return new MonteCarloResult(points, estimate, actualValue, insideCount, 
                                   request.getIterations(), convergenceHistory);
+    }
+
+    private boolean determineInside(String functionType, double x, double y, double functionValue) {
+        switch (functionType.toLowerCase()) {
+            case "unit_circle":
+                // For unit circle, inside if function returns 1 (meaning x^2 + y^2 <= 1)
+                return functionValue == 1.0;
+                
+            case "circle":
+                // Circle is now handled by SquareFunction (x^2 + y^2 <= 4)
+                return functionValue == 1.0;
+                
+            case "sin_product":
+                // For sin(x*y), we can consider positive values as "inside" for visualization
+                return !Double.isNaN(functionValue) && functionValue >= 0;
+                
+            case "square":
+                // For x² + y² ≤ 4, inside if function returns 1
+                return functionValue == 1.0;
+                
+            case "ellipse":
+                // For ellipse x²/4 + y² ≤ 1, inside if function returns 1
+                return functionValue == 1.0;
+                
+            case "diamond":
+                // For diamond |x| + |y| ≤ 2, inside if function returns 1
+                return functionValue == 1.0;
+                
+            default:
+                // Default behavior: inside if not NaN and >= 0
+                return !Double.isNaN(functionValue) && functionValue >= 0;
+        }
     }
 }
