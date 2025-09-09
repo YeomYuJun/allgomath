@@ -41,10 +41,11 @@ public class BezierService {
         }
 
         // Calculate current point for the given t parameter
-        BezierRequest.Point2D currentPoint = deCasteljauPoint(controlPoints, request.getTParameter());
+        double currentT = request.getTParameter();
+        BezierRequest.Point2D currentPoint = deCasteljauPoint(controlPoints, currentT);
 
         return new BezierResult(curvePoints, constructionLines, intermediatePoints, 
-                               currentPoint, request.getTParameter(), degree);
+                               currentPoint, currentT, degree);
     }
 
     private BezierRequest.Point2D deCasteljauPoint(List<BezierRequest.Point2D> controlPoints, double t) {

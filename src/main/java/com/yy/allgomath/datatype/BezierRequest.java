@@ -1,15 +1,22 @@
 package com.yy.allgomath.datatype;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 public class BezierRequest {
+    @JsonProperty("controlPoints")
     private List<Point2D> controlPoints;
+    @JsonProperty("resolution")
     private int resolution;
+    @JsonProperty("tParameter")
     private double tParameter;
+    @JsonProperty("showConstructionLines")
     private boolean showConstructionLines;
 
     public static class Point2D {
+        @JsonProperty("x")
         private double x;
+        @JsonProperty("y")
         private double y;
 
         public Point2D() {}
