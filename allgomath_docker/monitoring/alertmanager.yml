@@ -1,0 +1,128 @@
+global:
+  resolve_timeout: 5m
+  # Slack webhook URL (실제 사용 시 설정 필요)
+  # slack_api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+
+# 알림 라우팅 규칙
+route:
+  group_by: ['alertname', 'component']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  receiver: 'default'
+
+  routes:
+    # Critical 알림은 즉시 전송
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 0s
+      repeat_interval: 5m
+
+    # Warning 알림은 그룹화
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+      group_wait: 30s
+      repeat_interval: 1h
+
+    # Redis 관련 알림
+    - match:
+        component: redis
+      receiver: 'redis-alerts'
+      group_wait: 20s
+
+    # API 관련 알림
+    - match:
+        component: api
+      receiver: 'api-alerts'
+      group_wait: 20s
+
+# 알림 수신자 설정
+receivers:
+  # 기본 수신자 (로그만 출력)
+  - name: 'default'
+    webhook_configs:
+      - url: 'http://localhost:9093/api/v1/alerts'
+        send_resolved: true
+
+  # Critical 알림 (Slack + Email)
+  - name: 'critical-alerts'
+    # Slack 설정 (실제 사용 시 주석 해제)
+    # slack_configs:
+    #   - channel: '#allgomath-critical'
+    #     title: '🚨 Critical Alert: {{ .GroupLabels.alertname }}'
+    #     text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+    #     send_resolved: true
+
+    # Email 설정 (실제 사용 시 주석 해제)
+    # email_configs:
+    #   - to: 'admin@allgomath.com'
+    #     from: 'alertmanager@allgomath.com'
+    #     smarthost: 'smtp.gmail.com:587'
+    #     auth_username: 'alertmanager@allgomath.com'
+    #     auth_password: 'YOUR_PASSWORD'
+    #     headers:
+    #       Subject: '[CRITICAL] AllgoMath Alert'
+
+    # Webhook (임시 - 로그용)
+    webhook_configs:
+      - url: 'http://localhost:9093/api/v1/alerts'
+        send_resolved: true
+
+  # Warning 알림
+  - name: 'warning-alerts'
+    # slack_configs:
+    #   - channel: '#allgomath-warnings'
+    #     title: '⚠️ Warning: {{ .GroupLabels.alertname }}'
+    #     text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+    #     send_resolved: true
+
+    webhook_configs:
+      - url: 'http://localhost:9093/api/v1/alerts'
+        send_resolved: true
+
+  # Redis 알림
+  - name: 'redis-alerts'
+    # slack_configs:
+    #   - channel: '#allgomath-redis'
+    #     title: '💾 Redis Alert: {{ .GroupLabels.alertname }}'
+    #     text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+
+    webhook_configs:
+      - url: 'http://localhost:9093/api/v1/alerts'
+        send_resolved: true
+
+  # API 알림
+  - name: 'api-alerts'
+    # slack_configs:
+    #   - channel: '#allgomath-api'
+    #     title: '🌐 API Alert: {{ .GroupLabels.alertname }}'
+    #     text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+
+    webhook_configs:
+      - url: 'http://localhost:9093/api/v1/alerts'
+        send_resolved: true
+
+# 알림 억제 규칙 (중복 알림 방지)
+inhibit_rules:
+  # Critical 알림이 발생하면 같은 컴포넌트의 Warning 억제
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['component', 'alertname']
+
+  # API 다운 시 다른 API 관련 알림 억제
+  - source_match:
+      alertname: 'AllgoMathAPIDown'
+    target_match_re:
+      alertname: '(HighAPILatency|HighErrorRate|LowThroughput)'
+    equal: ['component']
+
+  # Redis 다운 시 다른 Redis 관련 알림 억제
+  - source_match:
+      alertname: 'RedisDown'
+    target_match_re:
+      alertname: '(LowCacheHitRate|HighRedisMemoryUsage|HighRedisConnections)'
+    equal: ['component']

@@ -7,3 +7,23 @@ datasources:
     url: http://prometheus:9090
     isDefault: true
     editable: true
+    jsonData:
+      httpMethod: POST
+      timeInterval: 15s
+      queryTimeout: 60s
+      # Alertmanager 통합
+      manageAlerts: true
+      alertmanagerUid: alertmanager
+    version: 1
+
+  - name: Alertmanager
+    type: alertmanager
+    access: proxy
+    url: http://alertmanager:9093
+    isDefault: false
+    editable: true
+    uid: alertmanager
+    jsonData:
+      implementation: prometheus
+      handleGrafanaManagedAlerts: false
+    version: 1
