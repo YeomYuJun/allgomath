@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Docker runtime / secrets
+allgomath_docker/.env
+allgomath_docker/nginx/ssl/
