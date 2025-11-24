@@ -25,7 +25,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -92,7 +92,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "des3teqapk6psc"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "max(max_over_time(redis_uptime_in_seconds{instance=~\"$instance\"}[$__interval]))",
@@ -112,7 +112,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -180,7 +180,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "des3teqapk6psc"
+            "uid": "prometheus"
           },
           "expr": "redis_connected_clients{instance=~\"$instance\"}",
           "format": "time_series",
@@ -198,7 +198,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -272,7 +272,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "des3teqapk6psc"
+            "uid": "prometheus"
           },
           "expr": "100 * (redis_memory_used_bytes{instance=~\"$instance\"}  / redis_memory_max_bytes{instance=~\"$instance\"} )",
           "format": "time_series",
@@ -290,7 +290,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -374,7 +374,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "des3teqapk6psc"
+            "uid": "prometheus"
           },
           "expr": "rate(redis_commands_processed_total{instance=~\"$instance\"}[1m])",
           "format": "time_series",
@@ -393,7 +393,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -478,7 +478,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "des3teqapk6psc"
+            "uid": "prometheus"
           },
           "expr": "irate(redis_keyspace_hits_total{instance=~\"$instance\"}[5m])",
           "format": "time_series",
@@ -494,7 +494,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "des3teqapk6psc"
+            "uid": "prometheus"
           },
           "expr": "irate(redis_keyspace_misses_total{instance=~\"$instance\"}[5m])",
           "format": "time_series",
@@ -514,7 +514,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -615,7 +615,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "des3teqapk6psc"
+            "uid": "prometheus"
           },
           "expr": "redis_memory_used_bytes{instance=~\"$instance\"} ",
           "format": "time_series",
@@ -629,7 +629,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "des3teqapk6psc"
+            "uid": "prometheus"
           },
           "expr": "redis_memory_max_bytes{instance=~\"$instance\"} ",
           "format": "time_series",
@@ -646,7 +646,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -730,7 +730,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "des3teqapk6psc"
+            "uid": "prometheus"
           },
           "expr": "rate(redis_net_input_bytes_total{instance=~\"$instance\"}[5m])",
           "format": "time_series",
@@ -742,7 +742,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "des3teqapk6psc"
+            "uid": "prometheus"
           },
           "expr": "rate(redis_net_output_bytes_total{instance=~\"$instance\"}[5m])",
           "format": "time_series",
@@ -759,7 +759,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -845,7 +845,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "des3teqapk6psc"
+            "uid": "prometheus"
           },
           "expr": "sum (redis_db_keys{instance=~\"$instance\"}) by (db)",
           "format": "time_series",
@@ -863,7 +863,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -947,7 +947,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "des3teqapk6psc"
+            "uid": "prometheus"
           },
           "expr": "sum (redis_db_keys{instance=~\"$instance\"}) - sum (redis_db_keys_expiring{instance=~\"$instance\"}) ",
           "format": "time_series",
@@ -961,7 +961,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "des3teqapk6psc"
+            "uid": "prometheus"
           },
           "expr": "sum (redis_db_keys_expiring{instance=~\"$instance\"}) ",
           "format": "time_series",
@@ -979,7 +979,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -1121,7 +1121,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "des3teqapk6psc"
+            "uid": "prometheus"
           },
           "expr": "sum(rate(redis_expired_keys_total{instance=~\"$instance\"}[5m])) by (instance)",
           "format": "time_series",
@@ -1137,7 +1137,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "des3teqapk6psc"
+            "uid": "prometheus"
           },
           "expr": "sum(rate(redis_evicted_keys_total{instance=~\"$instance\"}[5m])) by (instance)",
           "format": "time_series",
@@ -1154,7 +1154,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -1238,7 +1238,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "des3teqapk6psc"
+            "uid": "prometheus"
           },
           "expr": "topk(5, irate(redis_commands_total{instance=~\"$instance\"} [1m]))",
           "format": "time_series",
@@ -1256,7 +1256,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -1340,7 +1340,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "des3teqapk6psc"
+            "uid": "prometheus"
           },
           "expr": "redis_connected_clients{instance=\"$instance\"}",
           "format": "time_series",
@@ -1364,7 +1364,7 @@
       {
         "current": {
           "text": "prometheus",
-          "value": "des3teqapk6psc"
+          "value": "prometheus"
         },
         "includeAll": false,
         "label": "Prometheus",

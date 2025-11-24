@@ -18,7 +18,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "des3teqapk6psc"
+            "uid": "prometheus"
           },
           "enable": true,
           "expr": "resets(process_uptime_seconds{application=\"$application\", instance=\"$instance\"}[1m]) > 0",
@@ -57,7 +57,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -119,7 +119,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "process_uptime_seconds{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -136,7 +136,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -197,7 +197,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "process_start_time_seconds{application=\"$application\", instance=\"$instance\"}*1000",
             "format": "time_series",
@@ -214,7 +214,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -282,7 +282,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "sum(jvm_memory_used_bytes{application=\"$application\", instance=\"$instance\", area=\"heap\"})*100/sum(jvm_memory_max_bytes{application=\"$application\",instance=\"$instance\", area=\"heap\"})",
             "format": "time_series",
@@ -298,7 +298,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -376,7 +376,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "sum(jvm_memory_used_bytes{application=\"$application\", instance=\"$instance\", area=\"nonheap\"})*100/sum(jvm_memory_max_bytes{application=\"$application\",instance=\"$instance\", area=\"nonheap\"})",
             "format": "time_series",
@@ -405,7 +405,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -490,7 +490,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "sum(rate(http_server_requests_seconds_count{application=\"$application\", instance=\"$instance\"}[1m]))",
             "format": "time_series",
@@ -505,7 +505,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -621,7 +621,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "sum(rate(http_server_requests_seconds_count{application=\"$application\", instance=\"$instance\", status=~\"5..\"}[1m]))",
             "format": "time_series",
@@ -636,7 +636,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -721,7 +721,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "sum(rate(http_server_requests_seconds_sum{application=\"$application\", instance=\"$instance\", status!~\"5..\"}[1m]))/sum(rate(http_server_requests_seconds_count{application=\"$application\", instance=\"$instance\", status!~\"5..\"}[1m]))",
             "format": "time_series",
@@ -733,7 +733,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "max(http_server_requests_seconds_max{application=\"$application\", instance=\"$instance\", status!~\"5..\"})",
             "format": "time_series",
@@ -749,7 +749,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "description": "",
         "fieldConfig": {
@@ -835,7 +835,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "tomcat_threads_busy_threads{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -847,7 +847,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "tomcat_threads_current_threads{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -859,7 +859,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "tomcat_threads_config_max_threads{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -871,7 +871,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "jetty_threads_busy{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -883,7 +883,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "jetty_threads_current{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -895,7 +895,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "jetty_threads_config_max{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -924,7 +924,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -1010,7 +1010,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "sum(jvm_memory_used_bytes{application=\"$application\", instance=\"$instance\", area=\"heap\"})",
             "format": "time_series",
@@ -1023,7 +1023,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "sum(jvm_memory_committed_bytes{application=\"$application\", instance=\"$instance\", area=\"heap\"})",
             "format": "time_series",
@@ -1035,7 +1035,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "sum(jvm_memory_max_bytes{application=\"$application\", instance=\"$instance\", area=\"heap\"})",
             "format": "time_series",
@@ -1051,7 +1051,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -1137,7 +1137,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "sum(jvm_memory_used_bytes{application=\"$application\", instance=\"$instance\", area=\"nonheap\"})",
             "format": "time_series",
@@ -1151,7 +1151,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "sum(jvm_memory_committed_bytes{application=\"$application\", instance=\"$instance\", area=\"nonheap\"})",
             "format": "time_series",
@@ -1163,7 +1163,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "sum(jvm_memory_max_bytes{application=\"$application\", instance=\"$instance\", area=\"nonheap\"})",
             "format": "time_series",
@@ -1179,7 +1179,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -1265,7 +1265,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "sum(jvm_memory_used_bytes{application=\"$application\", instance=\"$instance\"})",
             "format": "time_series",
@@ -1278,7 +1278,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "sum(jvm_memory_committed_bytes{application=\"$application\", instance=\"$instance\"})",
             "format": "time_series",
@@ -1290,7 +1290,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "sum(jvm_memory_max_bytes{application=\"$application\", instance=\"$instance\"})",
             "format": "time_series",
@@ -1306,7 +1306,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -1392,7 +1392,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "process_memory_vss_bytes{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -1406,7 +1406,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "process_memory_rss_bytes{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -1417,7 +1417,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "process_memory_swap_bytes{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -1428,7 +1428,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "process_memory_rss_bytes{application=\"$application\", instance=\"$instance\"} + process_memory_swap_bytes{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -1456,7 +1456,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -1544,7 +1544,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "system_cpu_usage{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -1558,7 +1558,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "process_cpu_usage{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -1570,7 +1570,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "avg_over_time(process_cpu_usage{application=\"$application\", instance=\"$instance\"}[15m])",
             "format": "time_series",
@@ -1586,7 +1586,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -1673,7 +1673,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "system_load_average_1m{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -1686,7 +1686,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "system_cpu_count{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -1701,7 +1701,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -1788,7 +1788,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "jvm_threads_live_threads{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -1801,7 +1801,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "jvm_threads_daemon_threads{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -1814,7 +1814,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "jvm_threads_peak_threads{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -1826,7 +1826,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "process_threads{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -1843,7 +1843,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -2019,7 +2019,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "jvm_threads_states_threads{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -2034,7 +2034,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "description": "The percent of time spent on Garbage Collection over all CPUs assigned to the JVM process.",
         "fieldConfig": {
@@ -2123,7 +2123,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "sum(rate(jvm_gc_pause_seconds_sum{application=\"$application\", instance=\"$instance\"}[1m])) by (application, instance) / on(application, instance) system_cpu_count",
             "format": "time_series",
@@ -2138,7 +2138,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -2301,7 +2301,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "increase(logback_events_total{application=\"$application\", instance=\"$instance\"}[1m])",
             "format": "time_series",
@@ -2319,7 +2319,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -2407,7 +2407,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "process_files_open_files{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -2421,7 +2421,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "process_files_max_files{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -2453,7 +2453,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {},
@@ -2474,7 +2474,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "jvm_memory_used_bytes{application=\"$application\", instance=\"$instance\", id=~\"$jvm_memory_pool_heap\"}",
             "format": "time_series",
@@ -2489,7 +2489,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "jvm_memory_committed_bytes{application=\"$application\", instance=\"$instance\", id=~\"$jvm_memory_pool_heap\"}",
             "format": "time_series",
@@ -2504,7 +2504,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "jvm_memory_max_bytes{application=\"$application\", instance=\"$instance\", id=~\"$jvm_memory_pool_heap\"}",
             "format": "time_series",
@@ -2536,7 +2536,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {},
@@ -2557,7 +2557,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "jvm_memory_used_bytes{application=\"$application\", instance=\"$instance\", id=~\"$jvm_memory_pool_nonheap\"}",
             "format": "time_series",
@@ -2572,7 +2572,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "jvm_memory_committed_bytes{application=\"$application\", instance=\"$instance\", id=~\"$jvm_memory_pool_nonheap\"}",
             "format": "time_series",
@@ -2587,7 +2587,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "jvm_memory_max_bytes{application=\"$application\", instance=\"$instance\", id=~\"$jvm_memory_pool_nonheap\"}",
             "format": "time_series",
@@ -2619,7 +2619,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -2702,7 +2702,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "rate(jvm_gc_pause_seconds_count{application=\"$application\", instance=\"$instance\"}[1m])",
             "format": "time_series",
@@ -2718,7 +2718,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -2801,7 +2801,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "rate(jvm_gc_pause_seconds_sum{application=\"$application\", instance=\"$instance\"}[1m])/rate(jvm_gc_pause_seconds_count{application=\"$application\", instance=\"$instance\"}[1m])",
             "format": "time_series",
@@ -2814,7 +2814,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "jvm_gc_pause_seconds_max{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -2831,7 +2831,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -2914,7 +2914,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "rate(jvm_gc_memory_allocated_bytes_total{application=\"$application\", instance=\"$instance\"}[1m])",
             "format": "time_series",
@@ -2926,7 +2926,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "rate(jvm_gc_memory_promoted_bytes_total{application=\"$application\", instance=\"$instance\"}[1m])",
             "format": "time_series",
@@ -2955,7 +2955,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -3038,7 +3038,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "jvm_classes_loaded_classes{application=\"$application\", instance=\"$instance\"}",
             "format": "time_series",
@@ -3055,7 +3055,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -3137,7 +3137,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "delta(jvm_classes_loaded_classes{application=\"$application\",instance=\"$instance\"}[1m])",
             "format": "time_series",
@@ -3169,7 +3169,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "des3teqapk6psc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {},
@@ -3190,7 +3190,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "jvm_buffer_memory_used_bytes{application=\"$application\", instance=\"$instance\", id=~\"$jvm_buffer_pool\"}",
             "format": "time_series",
@@ -3201,7 +3201,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "jvm_buffer_total_capacity_bytes{application=\"$application\", instance=\"$instance\", id=~\"$jvm_buffer_pool\"}",
             "format": "time_series",
@@ -3212,7 +3212,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "des3teqapk6psc"
+              "uid": "prometheus"
             },
             "expr": "jvm_buffer_count_buffers{application=\"$application\", instance=\"$instance\", id=~\"$jvm_buffer_pool\"}",
             "format": "time_series",
@@ -3239,7 +3239,7 @@
             "text": "",
             "value": ""
           },
-          "datasource": "des3teqapk6psc",
+          "datasource": "prometheus",
           "includeAll": false,
           "label": "Application",
           "name": "application",
@@ -3254,7 +3254,7 @@
             "text": "host.docker.internal:8080",
             "value": "host.docker.internal:8080"
           },
-          "datasource": "des3teqapk6psc",
+          "datasource": "prometheus",
           "includeAll": false,
           "label": "Instance",
           "name": "instance",
@@ -3269,7 +3269,7 @@
             "text": "All",
             "value": "$__all"
           },
-          "datasource": "des3teqapk6psc",
+          "datasource": "prometheus",
           "hide": 2,
           "includeAll": true,
           "label": "JVM Memory Pools Heap",
@@ -3286,7 +3286,7 @@
             "text": "All",
             "value": "$__all"
           },
-          "datasource": "des3teqapk6psc",
+          "datasource": "prometheus",
           "hide": 2,
           "includeAll": true,
           "label": "JVM Memory Pools Non-Heap",
@@ -3303,7 +3303,7 @@
             "text": "All",
             "value": "$__all"
           },
-          "datasource": "des3teqapk6psc",
+          "datasource": "prometheus",
           "hide": 2,
           "includeAll": true,
           "label": "JVM Buffer Pools",
