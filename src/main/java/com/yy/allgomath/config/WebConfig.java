@@ -1,5 +1,6 @@
 package com.yy.allgomath.config;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -9,11 +10,18 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import javax.imageio.ImageIO;
 import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
 public class WebConfig {
+
+    @PostConstruct
+    public void initImageIOPlugins() {
+        // WebP 등 플러그인 이미지 포맷을 스캔
+        ImageIO.scanForPlugins();
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

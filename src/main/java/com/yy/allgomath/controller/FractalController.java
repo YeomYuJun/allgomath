@@ -1,6 +1,8 @@
 package com.yy.allgomath.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sksamuel.scrimage.ImmutableImage;
+import com.sksamuel.scrimage.webp.WebpWriter;
 import com.yy.allgomath.datatype.FractalResult;
 import com.yy.allgomath.fractal.FractalParameters;
 import com.yy.allgomath.fractal.calculator.FractalCalculator;
@@ -17,15 +19,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import javax.imageio.ImageIO;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.io.IOException;
 
 
 @RestController
@@ -64,12 +66,33 @@ public class FractalController {
         Timer.Sample sample = metrics.startFractalTimer();
         try {
             FractalResult result = generateFractalData(type, iterations, resolution, colorScheme, smooth, centerX, centerY, zoom, juliaReal, juliaImag);
-            
-            byte[] pngData = convertToPng(result.getPixels(), resolution, resolution);
+            byte[] pixels = result.getPixels();
+            BufferedImage bufferedImage = createImage(pixels, resolution, resolution);
+
+            // PNG vs WebP 성능 비교
+            long pngStart = System.nanoTime();
+            byte[] pngData = convertToPng(bufferedImage);
+            long pngTime = (System.nanoTime() - pngStart) / 1_000_000; // ms
+
+            long webpStart = System.nanoTime();
+            byte[] webpData = convertToWebp(bufferedImage);
+            long webpTime = (System.nanoTime() - webpStart) / 1_000_000; // ms
+
+            double compressionRatio = (1.0 - (double)webpData.length / pngData.length) * 100;
+
+            System.out.println("=== 이미지 포맷 성능비교 ===");
+            System.out.println("PNG  - 크기: " + String.format("%,d", pngData.length) + " bytes, 시간: " + pngTime + "ms");
+            System.out.println("WebP - 크기: " + String.format("%,d", webpData.length) + " bytes, 시간: " + webpTime + "ms");
+            System.out.println("압축률: " + String.format("%.1f", compressionRatio) + "% 작음");
+            System.out.println("속도: " + (pngTime > webpTime ? "WebP " + String.format("%.1f", (double)pngTime/webpTime) + "x 빠름" : "PNG " + String.format("%.1f", (double)webpTime/pngTime) + "x 빠름"));
+
+            // WebP 사용
+            byte[] imageData = webpData;
+            MediaType mediaType = MediaType.parseMediaType("image/webp");
 
             HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.IMAGE_PNG);
-            headers.setContentLength(pngData.length);
+            headers.setContentType(mediaType);
+            headers.setContentLength(imageData.length);
             headers.setCacheControl("no-cache, no-store, max-age=0, must-revalidate");
 
 
@@ -82,7 +105,7 @@ public class FractalController {
 
 
             metrics.recordFractalTime(sample, type);
-            return new ResponseEntity<>(pngData, headers, HttpStatus.OK);
+            return new ResponseEntity<>(imageData, headers, HttpStatus.OK);
 
         } catch (IllegalArgumentException e) {
             metrics.recordFractalTime(sample, type);
@@ -94,24 +117,33 @@ public class FractalController {
         }
     }
 
-    private byte[] convertToPng(byte[] pixels, int width, int height) throws IOException {
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
-        byte[] abgr = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-        // RGBA -> ABGR 변환
+    private BufferedImage createImage(byte[] pixels, int width, int height) {
+        // TYPE_INT_RGB 사용 (알파 채널 불필요, WebP 인코딩 최적화)
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
         for (int i = 0; i < width * height; i++) {
             int r = pixels[i * 4] & 0xFF;
             int g = pixels[i * 4 + 1] & 0xFF;
             int b = pixels[i * 4 + 2] & 0xFF;
-            int a = pixels[i * 4 + 3] & 0xFF;
-            abgr[i * 4]     = (byte) a;
-            abgr[i * 4 + 1] = (byte) b;
-            abgr[i * 4 + 2] = (byte) g;
-            abgr[i * 4 + 3] = (byte) r;
+            // 알파 채널 무시 (프랙탈은 항상 불투명)
+
+            // RGB 포맷으로 패킹: (R << 16) | (G << 8) | B
+            int rgb = (r << 16) | (g << 8) | b;
+            image.setRGB(i % width, i / width, rgb);
         }
+        return image;
+    }
+
+    private byte[] convertToPng(BufferedImage image) throws IOException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             ImageIO.write(image, "png", baos);
             return baos.toByteArray();
         }
+    }
+
+    private byte[] convertToWebp(BufferedImage image) throws IOException {
+        ImmutableImage immutableImage = ImmutableImage.wrapAwt(image);
+        return immutableImage.bytes(WebpWriter.DEFAULT.withQ(80));
     }
 
 
