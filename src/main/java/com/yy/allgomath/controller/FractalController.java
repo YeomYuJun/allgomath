@@ -65,26 +65,31 @@ public class FractalController {
 
         Timer.Sample sample = metrics.startFractalTimer();
         try {
+            long totalStart = System.nanoTime();
+
             FractalResult result = generateFractalData(type, iterations, resolution, colorScheme, smooth, centerX, centerY, zoom, juliaReal, juliaImag);
+            long fractalDataTime = (System.nanoTime() - totalStart) / 1_000_000;
+
+            long pixelStart = System.nanoTime();
             byte[] pixels = result.getPixels();
+            long pixelTime = (System.nanoTime() - pixelStart) / 1_000_000;
+
+            long imageStart = System.nanoTime();
             BufferedImage bufferedImage = createImage(pixels, resolution, resolution);
+            long imageTime = (System.nanoTime() - imageStart) / 1_000_000;
 
-            // PNG vs WebP 성능 비교
-            long pngStart = System.nanoTime();
-            byte[] pngData = convertToPng(bufferedImage);
-            long pngTime = (System.nanoTime() - pngStart) / 1_000_000; // ms
-
+            // WebP 직접 생성 (PNG 생성 제거로 성능 향상)
             long webpStart = System.nanoTime();
             byte[] webpData = convertToWebp(bufferedImage);
-            long webpTime = (System.nanoTime() - webpStart) / 1_000_000; // ms
+            long webpTime = (System.nanoTime() - webpStart) / 1_000_000;
 
-            double compressionRatio = (1.0 - (double)webpData.length / pngData.length) * 100;
-
-            System.out.println("=== 이미지 포맷 성능비교 ===");
-            System.out.println("PNG  - 크기: " + String.format("%,d", pngData.length) + " bytes, 시간: " + pngTime + "ms");
-            System.out.println("WebP - 크기: " + String.format("%,d", webpData.length) + " bytes, 시간: " + webpTime + "ms");
-            System.out.println("압축률: " + String.format("%.1f", compressionRatio) + "% 작음");
-            System.out.println("속도: " + (pngTime > webpTime ? "WebP " + String.format("%.1f", (double)pngTime/webpTime) + "x 빠름" : "PNG " + String.format("%.1f", (double)webpTime/pngTime) + "x 빠름"));
+            System.out.println("=== 이미지 생성 성능 분석 ===");
+            System.out.println("프랙탈 데이터 생성: " + fractalDataTime + "ms");
+            System.out.println("픽셀 배열 생성: " + pixelTime + "ms");
+            System.out.println("BufferedImage 생성: " + imageTime + "ms");
+            System.out.println("WebP 인코딩: " + webpTime + "ms");
+            System.out.println("전체 시간: " + ((System.nanoTime() - totalStart) / 1_000_000) + "ms");
+            System.out.println("WebP 크기: " + String.format("%,d", webpData.length) + " bytes");
 
             // WebP 사용
             byte[] imageData = webpData;
@@ -121,16 +126,19 @@ public class FractalController {
         // TYPE_INT_RGB 사용 (알파 채널 불필요, WebP 인코딩 최적화)
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
+        // Raster 직접 접근으로 최적화 (setRGB보다 10배 이상 빠름)
+        int[] rgbArray = new int[width * height];
+
         for (int i = 0; i < width * height; i++) {
             int r = pixels[i * 4] & 0xFF;
             int g = pixels[i * 4 + 1] & 0xFF;
             int b = pixels[i * 4 + 2] & 0xFF;
-            // 알파 채널 무시 (프랙탈은 항상 불투명)
-
             // RGB 포맷으로 패킹: (R << 16) | (G << 8) | B
-            int rgb = (r << 16) | (g << 8) | b;
-            image.setRGB(i % width, i / width, rgb);
+            rgbArray[i] = (r << 16) | (g << 8) | b;
         }
+
+        // 한번에 전체 픽셀 데이터 설정 (매우 빠름)
+        image.setRGB(0, 0, width, height, rgbArray, 0, width);
         return image;
     }
 

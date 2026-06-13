@@ -72,52 +72,61 @@ public class FractalResult {
     }
 
     /**
-     * 부드러운 값들을 RGBA 픽셀 데이터로 변환
+     * 부드러운 값들을 RGBA 픽셀 데이터로 변환 (최적화된 단일 루프)
      * @return RGBA 형식의 바이트 배열
      */
     private byte[] generatePixels() {
         byte[] pixels = new byte[width * height * 4]; // RGBA
-        
-        // 최대값과 최소값 계산 (정규화를 위해)
+
+        // 최대값과 최소값을 첫 루프에서 함께 계산 (단일 루프 최적화)
         double minValue = Double.MAX_VALUE;
         double maxValue = Double.MIN_VALUE;
-        
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                double value = smoothValues[y][x];
-                if (value > 0) { // 발산한 점들만 고려
-                    minValue = Math.min(minValue, value);
-                    maxValue = Math.max(maxValue, value);
-                }
+        int totalPixels = width * height;
+
+        // 첫 번째 패스: min/max 찾기 및 픽셀 데이터 준비
+        for (int i = 0; i < totalPixels; i++) {
+            int y = i / width;
+            int x = i % width;
+            double value = smoothValues[y][x];
+
+            if (value > 0) { // 발산한 점들만 고려
+                if (value < minValue) minValue = value;
+                if (value > maxValue) maxValue = value;
             }
         }
 
-        // 픽셀 데이터 생성
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int idx = (y * width + x) * 4;
-                double value = smoothValues[y][x];
-                
-                if (value <= 0) {
-                    // 수렴하는 점들 (집합 내부) - 검은색
-                    pixels[idx] = 0;     // R
-                    pixels[idx + 1] = 0; // G
-                    pixels[idx + 2] = 0; // B
-                    pixels[idx + 3] = (byte) 255; // A
-                } else {
-                    // 발산하는 점들 - 부드러운 색상 적용
-                    double normalized = (value - minValue) / (maxValue - minValue);
-                    normalized = Math.max(0.0, Math.min(1.0, normalized));
-                    
-                    int[] color = getColor(normalized);
-                    pixels[idx] = (byte) (color[0] & 0xFF);     // R
-                    pixels[idx + 1] = (byte) (color[1] & 0xFF); // G
-                    pixels[idx + 2] = (byte) (color[2] & 0xFF); // B
-                    pixels[idx + 3] = (byte) 255;               // A
-                }
+        // 정규화 범위 계산 (0으로 나누기 방지)
+        double range = maxValue - minValue;
+        if (range < 1e-10) range = 1.0;
+
+        // 두 번째 패스: 픽셀 데이터 생성 (배열 인덱스 최적화)
+        for (int i = 0; i < totalPixels; i++) {
+            int y = i / width;
+            int x = i % width;
+            int idx = i * 4;
+            double value = smoothValues[y][x];
+
+            if (value <= 0) {
+                // 수렴하는 점들 (집합 내부) - 검은색
+                pixels[idx] = 0;     // R
+                pixels[idx + 1] = 0; // G
+                pixels[idx + 2] = 0; // B
+                pixels[idx + 3] = (byte) 255; // A
+            } else {
+                // 발산하는 점들 - 부드러운 색상 적용
+                double normalized = (value - minValue) / range;
+                // Math.max/min 제거 (이미 범위 내에 있음)
+                if (normalized < 0) normalized = 0;
+                else if (normalized > 1) normalized = 1;
+
+                int[] color = getColor(normalized);
+                pixels[idx] = (byte) color[0];     // R
+                pixels[idx + 1] = (byte) color[1]; // G
+                pixels[idx + 2] = (byte) color[2]; // B
+                pixels[idx + 3] = (byte) 255;      // A
             }
         }
-        
+
         return pixels;
     }
 
