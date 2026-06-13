@@ -3,6 +3,7 @@ package com.yy.allgomath.config;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,14 +21,9 @@ import java.util.Map;
 @EnableCaching
 public class CacheConfig {
 
-    public CacheConfig() {
-        System.out.println("===== CacheConfig 생성자 호출됨 =====");
-    }
-
     @Bean
+    @ConditionalOnProperty(prefix = "spring.cache", name = "type", havingValue = "redis", matchIfMissing = true)
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        System.out.println("===== RedisCacheManager 빈 생성 시작 =====");
-
         //직렬화 이슈로 인한 추가사항
         //커스텀 ObjectMapper 설정
         ObjectMapper objectMapper = new ObjectMapper();

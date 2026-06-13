@@ -1,0 +1,10 @@
+spring:
+  cache:
+    type: none          # @Cacheable 무력화 → Redis 불필요
+  data:
+    redis:
+      host: localhost
+      port: 6379
+logging:
+  level:
+    root: WARN
