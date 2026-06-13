@@ -39,3 +39,19 @@ out/
 # Docker runtime / secrets
 allgomath_docker/.env
 allgomath_docker/nginx/ssl/
+
+# Claude Code / AI tooling (local)
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+
+# GitHub workflows (local, untracked)
+.github/
+
+# Working notes / scratch docs (local)
+GRAFANA_ISSUE_SUMMARY.md
+allgomath_docker/*.md
+
+# Grafana dashboard work-in-progress
+allgomath_docker/monitoring/grafana/provisioning/dashboards/*.json_new
+allgomath_docker/monitoring/grafana/provisioning/dashboards/temp/
