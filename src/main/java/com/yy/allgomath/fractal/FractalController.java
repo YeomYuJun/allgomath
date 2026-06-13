@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -28,6 +29,8 @@ import java.util.Map;
 @Validated
 @RequiredArgsConstructor
 public class FractalController {
+
+    private static final MediaType IMAGE_WEBP = MediaType.parseMediaType("image/webp");
 
     private final FractalService fractalService;
     private final FractalImageEncoder imageEncoder;
@@ -44,23 +47,27 @@ public class FractalController {
             @RequestParam(defaultValue = "0.0") double centerY,
             @RequestParam(defaultValue = "1.0") double zoom,
             @RequestParam(required = false) Double juliaReal,
-            @RequestParam(required = false) Double juliaImag) throws Exception {
+            @RequestParam(required = false) Double juliaImag) throws IOException {
 
         Timer.Sample sample = metrics.startFractalTimer();
-        FractalResult result = fractalService.generate(type, iterations, resolution, colorScheme,
-                smooth, centerX, centerY, zoom, juliaReal, juliaImag);
-        byte[] webpData = imageEncoder.encodeToWebp(result.getPixels(), resolution, resolution);
-        metrics.recordFractalTime(sample, type);
+        try {
+            // 인자 순서는 /generate 와 동일하게 유지할 것 (positional, 두 호출부 동기화)
+            FractalResult result = fractalService.generate(type, iterations, resolution, colorScheme,
+                    smooth, centerX, centerY, zoom, juliaReal, juliaImag);
+            byte[] webpData = imageEncoder.encodeToWebp(result.getPixels(), resolution, resolution);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType("image/webp"));
-        headers.setContentLength(webpData.length);
-        headers.setCacheControl("no-cache, no-store, max-age=0, must-revalidate");
-        headers.add("Access-Control-Allow-Methods", "GET, OPTIONS");
-        headers.add("Access-Control-Allow-Headers", "Content-Type");
-        headers.add("Access-Control-Expose-Headers", "Content-Type, Content-Length");
-        headers.add("X-Content-Type-Options", "nosniff");
-        return new ResponseEntity<>(webpData, headers, HttpStatus.OK);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(IMAGE_WEBP);
+            headers.setContentLength(webpData.length);
+            headers.setCacheControl("no-cache, no-store, max-age=0, must-revalidate");
+            headers.add("Access-Control-Allow-Methods", "GET, OPTIONS");
+            headers.add("Access-Control-Allow-Headers", "Content-Type");
+            headers.add("Access-Control-Expose-Headers", "Content-Type, Content-Length");
+            headers.add("X-Content-Type-Options", "nosniff");
+            return new ResponseEntity<>(webpData, headers, HttpStatus.OK);
+        } finally {
+            metrics.recordFractalTime(sample, type);
+        }
     }
 
     @Timed(value = "fractal.api.response.time", description = "프랙탈 API 응답 시간")
@@ -78,10 +85,14 @@ public class FractalController {
             @RequestParam(required = false) Double juliaImag) {
 
         Timer.Sample sample = metrics.startFractalTimer();
-        FractalResult result = fractalService.generate(type, iterations, resolution, colorScheme,
-                smooth, centerX, centerY, zoom, juliaReal, juliaImag);
-        metrics.recordFractalTime(sample, type);
-        return ResponseEntity.ok(result);
+        try {
+            // 인자 순서는 /generate/image 와 동일하게 유지할 것 (positional, 두 호출부 동기화)
+            FractalResult result = fractalService.generate(type, iterations, resolution, colorScheme,
+                    smooth, centerX, centerY, zoom, juliaReal, juliaImag);
+            return ResponseEntity.ok(result);
+        } finally {
+            metrics.recordFractalTime(sample, type);
+        }
     }
 
     @GetMapping("/types")
