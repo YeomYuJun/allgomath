@@ -8,6 +8,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -70,7 +73,18 @@ class FractalCharacterizationTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", "image/webp"))
                 .andReturn().getResponse().getContentAsByteArray();
-        org.junit.jupiter.api.Assertions.assertTrue(body.length > 0, "webp body should be non-empty");
+        // WebP = RIFF 컨테이너: bytes 0-3 "RIFF", bytes 8-11 "WEBP"
+        assertAll(
+                () -> assertTrue(body.length > 12, "webp body too short"),
+                () -> assertEquals('R', (char) body[0]),
+                () -> assertEquals('I', (char) body[1]),
+                () -> assertEquals('F', (char) body[2]),
+                () -> assertEquals('F', (char) body[3]),
+                () -> assertEquals('W', (char) body[8]),
+                () -> assertEquals('E', (char) body[9]),
+                () -> assertEquals('B', (char) body[10]),
+                () -> assertEquals('P', (char) body[11])
+        );
     }
 
     @Test
