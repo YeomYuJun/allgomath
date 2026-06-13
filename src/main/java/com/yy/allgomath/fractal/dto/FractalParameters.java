@@ -1,4 +1,4 @@
-package com.yy.allgomath.fractal;
+package com.yy.allgomath.fractal.dto;
 
 import lombok.Builder;
 import lombok.Data;

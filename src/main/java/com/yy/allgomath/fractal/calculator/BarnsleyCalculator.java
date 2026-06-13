@@ -1,6 +1,6 @@
 package com.yy.allgomath.fractal.calculator;
 
-import com.yy.allgomath.fractal.FractalParameters;
+import com.yy.allgomath.fractal.dto.FractalParameters;
 import org.springframework.stereotype.Component;
 
 import java.util.Random;

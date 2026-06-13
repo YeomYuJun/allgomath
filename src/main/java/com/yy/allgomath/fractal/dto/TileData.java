@@ -1,4 +1,4 @@
-package com.yy.allgomath.datatype;
+package com.yy.allgomath.fractal.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

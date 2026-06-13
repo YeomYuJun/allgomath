@@ -1,8 +1,8 @@
 package com.yy.allgomath.service;
 
 import com.yy.allgomath.datatype.Complex;
-import com.yy.allgomath.datatype.TileData;
-import com.yy.allgomath.fractal.FractalParameters;
+import com.yy.allgomath.fractal.dto.TileData;
+import com.yy.allgomath.fractal.dto.FractalParameters;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 

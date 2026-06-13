@@ -1,4 +1,4 @@
-package com.yy.allgomath.datatype;
+package com.yy.allgomath.fractal.dto;
 
 /**
  * 프랙탈 계산 결과를 저장하는 클래스

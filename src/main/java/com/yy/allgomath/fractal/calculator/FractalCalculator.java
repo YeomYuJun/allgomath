@@ -1,6 +1,6 @@
 package com.yy.allgomath.fractal.calculator;
 
-import com.yy.allgomath.fractal.FractalParameters;
+import com.yy.allgomath.fractal.dto.FractalParameters;
 
 /**
  * 프랙탈 계산을 위한 Strategy 인터페이스

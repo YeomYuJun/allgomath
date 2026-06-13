@@ -1,7 +1,7 @@
 package com.yy.allgomath.cache.service;
 
 import com.yy.allgomath.fractal.FractalCalculatorFactory;
-import com.yy.allgomath.fractal.FractalParameters;
+import com.yy.allgomath.fractal.dto.FractalParameters;
 import com.yy.allgomath.fractal.calculator.FractalCalculator;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
