@@ -1,16 +1,18 @@
-package com.yy.allgomath.service;
+package com.yy.allgomath.fractal;
 
 import com.yy.allgomath.datatype.Complex;
 import com.yy.allgomath.fractal.dto.TileData;
 import com.yy.allgomath.fractal.dto.FractalParameters;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class TileCacheService {
-    private static final int PRECISION = 10000; // 소수점 4자리까지
+    private static final int PRECISION = 10000; // 4 decimal places
 
-    //DTO 타입으로 래핑
+    //DTO wrapper
     @Cacheable(value = "mandelbrot_tile",
             key = "#params.maxIterations + '_' + #params.smooth + '_' + " +
                     "T(Math).round(#tileXMin * " + PRECISION + ") + '_' + " +
@@ -21,8 +23,8 @@ public class TileCacheService {
     public TileData  calculateTile(FractalParameters params,
                                     double tileXMin, double tileYMin,
                                     double tileXMax, double tileYMax) {
-        System.out.println("===== calculateTile 메서드 실제 호출됨 (캐시 미스) =====");
-        System.out.println("캐시 키 생성 대상 파라미터: " + params.getMaxIterations() + ", " + params.isSmooth());
+        log.debug("calculateTile cache miss");
+        log.debug("tile params: maxIter={}, smooth={}", params.getMaxIterations(), params.isSmooth());
         double[][] tileValues = new double[32][32];
 
         double pixelXStep = (tileXMax - tileXMin) / 32;
@@ -42,7 +44,7 @@ public class TileCacheService {
                 }
             }
         }
-        System.out.println("===== calculateTile 계산 완료, TileData 반환 =====");
+        log.debug("calculateTile done");
         return new TileData(tileValues);
     }
 

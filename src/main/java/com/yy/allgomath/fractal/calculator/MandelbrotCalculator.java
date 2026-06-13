@@ -3,7 +3,8 @@ package com.yy.allgomath.fractal.calculator;
 import com.yy.allgomath.datatype.Complex;
 import com.yy.allgomath.fractal.dto.TileData;
 import com.yy.allgomath.fractal.dto.FractalParameters;
-import com.yy.allgomath.service.TileCacheService;
+import com.yy.allgomath.fractal.TileCacheService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
@@ -12,8 +13,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * 만델브로 집합 계산기
+ * Mandelbrot set calculator
  */
+@Slf4j
 @Component
 public class MandelbrotCalculator implements FractalCalculator {
     //기존 만델브로 캐싱 사이즈가 너무 크기 떄문에 조금 더 상세한 캐싱 유도해야함. => 32
@@ -59,17 +61,17 @@ public class MandelbrotCalculator implements FractalCalculator {
     //    @Cacheable(value = "mandelbrot", key = "#params.width + '_' + #params.maxIterations")
     @Override
         public double[][] calculateWithCaching(FractalParameters params) {
-            System.out.println("calculateWithCaching 시작 - 해상도: " + params.getWidth() + "x" + params.getHeight());
+            log.debug("calculateWithCaching start - {}x{}", params.getWidth(), params.getHeight());
 
             try {
                 validateParameters(params);
 
                 double[][] values = new double[params.getHeight()][params.getWidth()];
-                System.out.println("빈 배열 생성 완료");
+                log.debug("empty array created");
 
                 int tilesX = (params.getWidth() + TILE_SIZE - 1) / TILE_SIZE;
                 int tilesY = (params.getHeight() + TILE_SIZE - 1) / TILE_SIZE;
-                System.out.println("타일 계산: " + tilesX + "x" + tilesY + " = " + (tilesX * tilesY) + "개");
+                log.debug("tile grid: {}x{} = {} tiles", tilesX, tilesY, tilesX * tilesY);
 
                 List<TileResult> tileResults = IntStream.range(0, tilesX * tilesY)
                         .parallel()
@@ -87,37 +89,34 @@ public class MandelbrotCalculator implements FractalCalculator {
                                         params, tileXMin, tileYMin, tileXMax, tileYMax);
                                 double[][] tileValues = tileData.getValues();
                                 if (tileValues == null) {
-                                    System.err.println("타일 계산 결과가 null: " + tileX + ", " + tileY);
+                                    log.warn("tile result null: {}, {}", tileX, tileY);
                                     return null;
                                 }
                                 return new TileResult(tileX, tileY, tileData);
                             } catch (Exception e) {
-                                System.err.println("타일 계산 오류 (" + tileX + ", " + tileY + "): " + e.getMessage());
-                                e.printStackTrace();
+                                log.warn("tile calc error ({}, {})", tileX, tileY, e);
                                 return null;
                             }
                         })
                         .filter(result -> result != null) // null 결과 제거
                         .toList();
 
-                System.out.println("타일 계산 완료: " + tileResults.size() + "/" + (tilesX * tilesY));
+                log.debug("tiles done: {}/{}", tileResults.size(), tilesX * tilesY);
 
                 // 타일 복사
                 tileResults.forEach(result -> {
                     try {
                         copyTileToArray(values, result.tileData.getValues(), result.tileX, result.tileY, params);
                     } catch (Exception e) {
-                        System.err.println("타일 복사 오류: " + e.getMessage());
-                        e.printStackTrace();
+                        log.warn("tile copy error", e);
                     }
                 });
 
-                System.out.println("calculateWithCaching 완료");
+                log.debug("calculateWithCaching done");
                 return values;
 
             } catch (Exception e) {
-                System.err.println("calculateWithCaching 전체 오류: " + e.getMessage());
-                e.printStackTrace();
+                log.error("calculateWithCaching failed", e);
                 throw e;
             }
     }
