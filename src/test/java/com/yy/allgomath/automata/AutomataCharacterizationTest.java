@@ -26,9 +26,9 @@ class AutomataCharacterizationTest {
         mockMvc.perform(post("/api/algorithms/automata/life/simulate")
                         .contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.generations.length()").value(2))
-                .andExpect(jsonPath("$.populations.length()").value(2))
-                .andExpect(jsonPath("$.populations[0]").value(3));
+                .andExpect(jsonPath("$.steps.length()").value(2))
+                .andExpect(jsonPath("$.series.length()").value(2))
+                .andExpect(jsonPath("$.series[0]").value(3.0));
     }
 
     @Test

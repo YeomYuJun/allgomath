@@ -71,8 +71,9 @@ class LifeServiceTest {
     @Test
     void simulate_returns_requested_number_of_generations() {
         boolean[][] g = grid(".....", ".XXX.", ".....");
-        var gens = svc.simulate(g, 3);
-        assertEquals(3, gens.size());
+        var resp = svc.simulate(g, 3);
+        assertEquals(3, resp.steps().size());
+        assertEquals(3, resp.series().length);
     }
 
     @Test

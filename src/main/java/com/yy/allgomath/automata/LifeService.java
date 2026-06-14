@@ -1,6 +1,8 @@
 package com.yy.allgomath.automata;
 
 import com.yy.allgomath.common.exception.InvalidParameterException;
+import com.yy.allgomath.simulation.BatchSimulator;
+import com.yy.allgomath.simulation.SimulationResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -8,23 +10,24 @@ import java.util.List;
 
 /** Conway Game of Life (B3/S23), 경계 유한 그리드(격자 밖은 죽음). */
 @Service
-public class LifeService {
+public class LifeService implements BatchSimulator<boolean[][], boolean[][]> {
 
     private static final int MAX_DIM = 120;
 
-    /** 입력 그리드에서 다음 steps 세대를 차례로 계산하여 반환(입력 미포함). */
-    public List<boolean[][]> simulate(boolean[][] grid, int steps) {
+    @Override
+    public SimulationResponse<boolean[][]> simulate(boolean[][] grid, int steps) {
         validate(grid);
         List<boolean[][]> result = new ArrayList<>(steps);
+        double[] series = new double[steps];
         boolean[][] current = grid;
         for (int i = 0; i < steps; i++) {
             current = nextGeneration(current);
             result.add(current);
+            series[i] = population(current);
         }
-        return result;
+        return new SimulationResponse<>(result, series);
     }
 
-    /** 한 세대 진행. */
     public boolean[][] nextGeneration(boolean[][] grid) {
         int h = grid.length, w = grid[0].length;
         boolean[][] next = new boolean[h][w];
