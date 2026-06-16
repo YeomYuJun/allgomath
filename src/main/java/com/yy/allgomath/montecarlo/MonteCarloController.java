@@ -1,8 +1,7 @@
-package com.yy.allgomath.controller;
+package com.yy.allgomath.montecarlo;
 
-import com.yy.allgomath.datatype.MonteCarloRequest;
-import com.yy.allgomath.datatype.MonteCarloResult;
-import com.yy.allgomath.service.MonteCarloService;
+import com.yy.allgomath.montecarlo.dto.MonteCarloRequest;
+import com.yy.allgomath.montecarlo.dto.MonteCarloResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

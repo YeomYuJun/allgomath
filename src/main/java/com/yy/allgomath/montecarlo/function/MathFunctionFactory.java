@@ -1,13 +1,7 @@
-package com.yy.allgomath.math;
-
-import com.yy.allgomath.math.functions.DiamondFunction;
-import com.yy.allgomath.math.functions.EllipseFunction;
-import com.yy.allgomath.math.functions.SinProductFunction;
-import com.yy.allgomath.math.functions.SquareFunction;
-import com.yy.allgomath.math.functions.UnitCircleFunction;
+package com.yy.allgomath.montecarlo.function;
 
 public class MathFunctionFactory {
-    
+
     public static MathFunction createFunction(String functionType) {
         switch (functionType.toLowerCase()) {
             case "square":

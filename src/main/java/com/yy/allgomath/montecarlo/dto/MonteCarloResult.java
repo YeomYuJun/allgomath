@@ -1,4 +1,4 @@
-package com.yy.allgomath.datatype;
+package com.yy.allgomath.montecarlo.dto;
 
 import java.util.List;
 

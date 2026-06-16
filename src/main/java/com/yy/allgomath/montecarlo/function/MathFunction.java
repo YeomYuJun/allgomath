@@ -1,4 +1,4 @@
-package com.yy.allgomath.math;
+package com.yy.allgomath.montecarlo.function;
 
 public interface MathFunction {
     double evaluate(double x, double y);

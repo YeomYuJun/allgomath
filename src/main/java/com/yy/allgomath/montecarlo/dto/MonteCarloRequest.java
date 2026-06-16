@@ -1,4 +1,4 @@
-package com.yy.allgomath.datatype;
+package com.yy.allgomath.montecarlo.dto;
 
 public class MonteCarloRequest {
     private int iterations;
