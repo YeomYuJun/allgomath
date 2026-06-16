@@ -1,6 +1,6 @@
 package com.yy.allgomath.fractal.calculator;
 
-import com.yy.allgomath.datatype.Complex;
+import com.yy.allgomath.fractal.Complex;
 import com.yy.allgomath.fractal.dto.FractalParameters;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;

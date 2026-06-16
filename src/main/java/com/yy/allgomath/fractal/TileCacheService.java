@@ -1,6 +1,5 @@
 package com.yy.allgomath.fractal;
 
-import com.yy.allgomath.datatype.Complex;
 import com.yy.allgomath.fractal.dto.TileData;
 import com.yy.allgomath.fractal.dto.FractalParameters;
 import lombok.extern.slf4j.Slf4j;
