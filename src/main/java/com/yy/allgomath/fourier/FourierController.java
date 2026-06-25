@@ -3,6 +3,9 @@ package com.yy.allgomath.fourier;
 import com.yy.allgomath.fourier.dto.FourierComputeRequest;
 import com.yy.allgomath.fourier.dto.FourierParams;
 import com.yy.allgomath.fourier.dto.FourierResult;
+import com.yy.allgomath.fourier.dto.FourierTransformParams;
+import com.yy.allgomath.fourier.dto.FourierTransformRequest;
+import com.yy.allgomath.fourier.dto.FourierTransformResult;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +21,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class FourierController {
 
     private final FourierService fourierService;
+    private final FourierTransformService fourierTransformService;
 
     @PostMapping("/series")
     public ResponseEntity<FourierResult> series(@Valid @RequestBody FourierComputeRequest req) {
         return ResponseEntity.ok(fourierService.compute(new FourierParams(req.wave(), req.N())));
+    }
+
+    @PostMapping("/transform")
+    public ResponseEntity<FourierTransformResult> transform(@Valid @RequestBody FourierTransformRequest req) {
+        return ResponseEntity.ok(fourierTransformService.compute(
+                new FourierTransformParams(req.signal(), req.sampleRate())));
     }
 }
