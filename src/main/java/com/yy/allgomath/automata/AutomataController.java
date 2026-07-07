@@ -20,6 +20,6 @@ public class AutomataController {
 
     @PostMapping("/life/simulate")
     public ResponseEntity<SimulationResponse<boolean[][]>> simulate(@Valid @RequestBody LifeSimulateRequest req) {
-        return ResponseEntity.ok(lifeService.simulate(req.grid(), req.steps()));
+        return ResponseEntity.ok(lifeService.simulate(req.grid(), req.steps(), req.birth(), req.survive()));
     }
 }
