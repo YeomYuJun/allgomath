@@ -49,6 +49,9 @@ public class PlotterService {
         if (params.learningRate() <= 0 || params.learningRate() > 1) {
             throw new InvalidParameterException("learningRate는 0 초과 1 이하여야 합니다.");
         }
+        if (params.classic()) {
+            return classicDescend(params);
+        }
         SurfaceFunction fn = SurfaceFunction.of(params.fn());
         int maxIter = params.maxIterations();
         double lr = params.learningRate();
@@ -100,5 +103,38 @@ public class PlotterService {
             if (Math.abs(x) > COORD_ABS_MAX || Math.abs(y) > COORD_ABS_MAX) break;
         }
         return new DescentResult(path, converged, last);
+    }
+
+    /**
+     * 교육용 순수 경사하강(클리핑/라인서치 없음): 학습률이 크면 실제로 발산하는 모습을 그대로 반환한다.
+     * range > 0이면 좌표를 ±range로 클램프해 경로가 곡면 밖으로 나가지 않는다.
+     */
+    private DescentResult classicDescend(DescentParams params) {
+        SurfaceFunction fn = SurfaceFunction.of(params.fn());
+        int maxIter = params.maxIterations();
+        double lr = params.learningRate();
+        double bound = params.range() > 0 ? params.range() : COORD_ABS_MAX;
+        double x = clamp(params.startX(), bound), y = clamp(params.startY(), bound);
+        List<GradPoint> path = new ArrayList<>();
+        boolean converged = false;
+        int last = 0;
+        for (int i = 0; i <= maxIter; i++) {
+            last = i;
+            double cz = fn.z(x, y);
+            double[] g = fn.grad(x, y);
+            if (!Double.isFinite(cz) || !Double.isFinite(g[0]) || !Double.isFinite(g[1])) break;
+            path.add(new GradPoint(i, x, y, cz, g[0], g[1]));
+            if (Math.hypot(g[0], g[1]) < 1e-3) {
+                converged = true;
+                break;
+            }
+            x = clamp(x - lr * g[0], bound);
+            y = clamp(y - lr * g[1], bound);
+        }
+        return new DescentResult(path, converged, last);
+    }
+
+    private static double clamp(double v, double bound) {
+        return Math.max(-bound, Math.min(bound, v));
     }
 }

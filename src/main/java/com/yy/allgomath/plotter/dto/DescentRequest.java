@@ -9,5 +9,7 @@ public record DescentRequest(
         double startX,
         double startY,
         double learningRate,
-        @Min(1) @Max(500) int maxIterations) {
+        @Min(1) @Max(500) int maxIterations,
+        boolean classic,
+        double range) {
 }

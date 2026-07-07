@@ -31,6 +31,7 @@ public class PlotterController {
     @PostMapping("/gradient-descent")
     public ResponseEntity<DescentResult> descend(@Valid @RequestBody DescentRequest req) {
         return ResponseEntity.ok(plotterService.descend(
-                new DescentParams(req.fn(), req.startX(), req.startY(), req.learningRate(), req.maxIterations())));
+                new DescentParams(req.fn(), req.startX(), req.startY(), req.learningRate(), req.maxIterations(),
+                        req.classic(), req.range())));
     }
 }
