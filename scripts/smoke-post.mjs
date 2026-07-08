@@ -38,6 +38,17 @@ const CASES = [
     payload: { iterations: 200, bounds: { xMin: -2, xMax: 2, yMin: -2, yMax: 2 }, functionType: 'circle' } },
   { name: 'fourier-transform', path: '/api/algorithms/fourier/transform',
     payload: { signal: [0, 1, 0, -1, 0, 1, 0, -1, 0, 1, 0, -1, 0, 1, 0, -1], sampleRate: 16 } },
+  { name: 'problems-knapsack', path: '/api/algorithms/problems/solve',
+    payload: { problemId: 'knapsack', params: { capacity: 10 },
+      input: { items: [{ w: 3, v: 4 }, { w: 4, v: 5 }, { w: 5, v: 6 }] } } },
+  { name: 'problems-classroom', path: '/api/algorithms/problems/solve',
+    payload: { problemId: 'classroom', params: {},
+      input: { lectures: [{ s: 0, e: 3 }, { s: 1, e: 4 }, { s: 3, e: 6 }] } } },
+  { name: 'problems-grid-path', path: '/api/algorithms/problems/solve',
+    payload: { problemId: 'grid-path', params: { mode: 'max' }, input: { grid: [[1, 3, 2], [4, 2, 1], [1, 5, 3]] } } },
+  { name: 'problems-interval', path: '/api/algorithms/problems/solve',
+    payload: { problemId: 'interval-scheduling', params: { strategy: 'finish' },
+      input: { tasks: [{ s: 0, e: 3 }, { s: 2, e: 5 }, { s: 4, e: 7 }] } } },
 ]
 
 let failed = 0
