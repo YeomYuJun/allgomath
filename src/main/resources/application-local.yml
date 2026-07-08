@@ -1,0 +1,6 @@
+# 로컬 개발용 프로파일 (--spring.profiles.active=local)
+# Redis 미기동 시 /actuator/health가 503(DOWN)으로 떨어지는 것을 방지한다. API 동작에는 영향 없음.
+management:
+  health:
+    redis:
+      enabled: false
