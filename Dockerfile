@@ -1,5 +1,5 @@
 # Multi-stage build for optimization
-FROM openjdk:17-jdk-slim AS builder
+FROM eclipse-temurin:17-jdk-jammy AS builder
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ COPY src src
 RUN ./gradlew build -x test --no-daemon
 
 # Production 이미지
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
 
