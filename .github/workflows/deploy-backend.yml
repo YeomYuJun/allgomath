@@ -78,33 +78,32 @@ jobs:
 
             cd /home/ec2-user/allgomath/allgomath_docker
 
+            # 허브 이미지를 받아 compose 빌드 이미지 이름으로 태깅 (compose 파일 수정 불필요)
             docker pull ${{ env.DOCKER_USER }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+            docker tag ${{ env.DOCKER_USER }}/${{ env.DOCKER_IMAGE_NAME }}:latest allgomath_docker-allgomath-api:latest
 
-            # 최초 1회만 build 설정을 레지스트리 이미지로 교체 (멱등)
-            if ! grep -q 'image: .*/allgomath-api' docker-compose-ful.yml; then
-              sed -i 's|build:|# build:|' docker-compose-ful.yml
-              sed -i 's|context: ..|# context: ..|' docker-compose-ful.yml
-              sed -i 's|dockerfile: Dockerfile|# dockerfile: Dockerfile|' docker-compose-ful.yml
-              sed -i '/allgomath-api:/a\    image: ${{ env.DOCKER_USER }}/${{ env.DOCKER_IMAGE_NAME }}:latest' docker-compose-ful.yml
-            fi
+            if docker compose version >/dev/null 2>&1; then DC="docker compose"; else DC="docker-compose"; fi
+            $DC -f docker-compose-production.yml up -d --no-build allgomath-api
 
-            docker-compose -f docker-compose-ful.yml pull allgomath-api
-            docker-compose -f docker-compose-ful.yml up -d allgomath-api
-
-            # 헬스체크
+            # 헬스체크 (최대 2분 폴링)
             echo "Waiting for health check..."
-            sleep 30
+            HEALTH=DOWN
+            for i in $(seq 1 12); do
+              sleep 10
+              if curl -sf http://localhost:8080/actuator/health | grep -q '"status":"UP"'; then HEALTH=UP; break; fi
+            done
 
-            HEALTH_STATUS=$(curl -s http://localhost:8080/actuator/health | grep -o '"status":"UP"' || echo "DOWN")
-
-            if [[ "$HEALTH_STATUS" == *"UP"* ]]; then
+            if [ "$HEALTH" = "UP" ]; then
               echo "Deployment successful! Application is healthy."
             else
-              echo "Deployment failed! Health check returned: $HEALTH_STATUS"
+              echo "Deployment failed! Health check: $HEALTH"
               exit 1
             fi
 
-            docker-compose -f docker-compose-ful.yml logs --tail=50 allgomath-api
+            # nginx가 재생성된 api 컨테이너의 새 IP를 다시 잡도록 재시작
+            $DC -f docker-compose-production.yml restart nginx || true
+
+            $DC -f docker-compose-production.yml logs --tail=50 allgomath-api
 
       # 7. 배포 성공 알림
       - name: Deployment Summary
