@@ -45,9 +45,6 @@ allgomath_docker/nginx/ssl/
 CLAUDE.md
 CLAUDE.local.md
 
-# GitHub workflows (local, untracked)
-.github/
-
 # Working notes / scratch docs (local)
 GRAFANA_ISSUE_SUMMARY.md
 allgomath_docker/*.md
