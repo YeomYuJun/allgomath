@@ -2,6 +2,7 @@ package com.yy.allgomath.fractal.calculator;
 
 import com.yy.allgomath.fractal.Complex;
 import com.yy.allgomath.fractal.dto.FractalParameters;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +13,12 @@ import java.util.stream.IntStream;
  */
 @Component
 public class JuliaCalculator implements FractalCalculator {
+
+    private final ObjectProvider<JuliaCalculator> self;
+
+    public JuliaCalculator(ObjectProvider<JuliaCalculator> self) {
+        this.self = self;
+    }
 
     @Cacheable(value = "julia",
             key = "T(java.util.Objects).hash(#params.xMin, #params.xMax, #params.yMin, #params.yMax, " +
@@ -45,9 +52,8 @@ public class JuliaCalculator implements FractalCalculator {
 
     @Override
     public double[][] calculateWithCaching(FractalParameters params) {
-        // 현재 줄리아 계산은 별도의 타일 캐싱을 사용하지 않으므로
-        // 기본 계산 로직을 그대로 위임하여 일관된 결과를 반환한다.
-        return calculate(params);
+        // @Cacheable은 프록시 경유 호출에서만 동작하므로 자기 빈을 프록시로 재조회해 위임한다
+        return self.getObject().calculate(params);
     }
 
     @Override
