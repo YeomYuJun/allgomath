@@ -23,7 +23,8 @@ public final class KnownRoutes {
             "/greedy",
             "/fourier-transform",
             "/sorting",
-            "/problems/:problemId"
+            "/problems/:problemId",
+            "/privacy"
     );
 
     private KnownRoutes() {
