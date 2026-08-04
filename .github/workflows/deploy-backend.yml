@@ -78,12 +78,19 @@ jobs:
 
             cd /home/ec2-user/allgomath/allgomath_docker
 
+            # 직전 배포 이미지가 태그를 잃고 dangling 으로 쌓여 루트 볼륨을 채운다
+            docker image prune -f || true
+            df -h /
+
             # 허브 이미지를 받아 compose 빌드 이미지 이름으로 태깅 (compose 파일 수정 불필요)
             docker pull ${{ env.DOCKER_USER }}/${{ env.DOCKER_IMAGE_NAME }}:latest
             docker tag ${{ env.DOCKER_USER }}/${{ env.DOCKER_IMAGE_NAME }}:latest allgomath_docker-allgomath-api:latest
 
             if docker compose version >/dev/null 2>&1; then DC="docker compose"; else DC="docker-compose"; fi
             $DC -f docker-compose-production.yml up -d --no-build allgomath-api
+
+            # 컨테이너 재생성으로 참조가 끊긴 이전 이미지를 즉시 회수
+            docker image prune -f || true
 
             # 헬스체크 (최대 2분 폴링)
             echo "Waiting for health check..."
