@@ -1,0 +1,119 @@
+{
+  "_comment": "seed-traffic.mjs가 쏘는 횟수와 기대값. 개수를 서로 다른 소수로 두어 라벨 뒤바뀜을 잡는다.",
+  "_paths": "path/body는 각 Controller의 @RequestMapping+@PostMapping과 요청 record 필드명, 그리고 Service의 imperative 검증(값 범위/허용 문자열)에 맞춘 실제 값이다. 전부 200을 기대한다.",
+  "endpoints": [
+    {
+      "algo": "bezier",
+      "count": 3,
+      "method": "POST",
+      "path": "/api/algorithms/bezier/compute",
+      "body": {
+        "controlPoints": [[0, 0], [40, 120], [160, -40], [200, 60]],
+        "samples": 64
+      }
+    },
+    {
+      "algo": "voronoi",
+      "count": 5,
+      "method": "POST",
+      "path": "/api/algorithms/voronoi/compute",
+      "body": {
+        "sites": [[10, 10], [70, 25], [35, 80], [90, 90]],
+        "metric": "euclid",
+        "grid": 48
+      }
+    },
+    {
+      "algo": "bfs",
+      "count": 7,
+      "method": "POST",
+      "path": "/api/algorithms/bfs/search",
+      "body": {
+        "rows": 6,
+        "cols": 6,
+        "walls": [
+          false, false, false, false, false, false,
+          false, true, true, false, false, false,
+          false, false, false, false, true, false,
+          false, true, false, true, false, false,
+          false, true, false, false, false, false,
+          false, false, false, false, false, false
+        ],
+        "start": 0,
+        "goal": 35,
+        "diag": false
+      }
+    },
+    {
+      "algo": "dfs",
+      "count": 11,
+      "method": "POST",
+      "path": "/api/algorithms/dfs/search",
+      "body": {
+        "rows": 6,
+        "cols": 6,
+        "walls": [
+          false, false, false, false, false, false,
+          false, true, true, false, false, false,
+          false, false, false, false, true, false,
+          false, true, false, true, false, false,
+          false, true, false, false, false, false,
+          false, false, false, false, false, false
+        ],
+        "start": 0,
+        "goal": 35
+      }
+    },
+    {
+      "algo": "dp",
+      "count": 13,
+      "method": "POST",
+      "path": "/api/algorithms/dp/solve",
+      "body": {
+        "grid": [[1, 3, 1, 2], [1, 5, 1, 3], [4, 2, 1, 1], [2, 1, 6, 4]],
+        "mode": "max"
+      }
+    },
+    {
+      "algo": "greedy",
+      "count": 17,
+      "method": "POST",
+      "path": "/api/algorithms/greedy/schedule",
+      "body": {
+        "tasks": [
+          { "s": 0, "e": 3 },
+          { "s": 2, "e": 5 },
+          { "s": 4, "e": 7 },
+          { "s": 6, "e": 9 },
+          { "s": 1, "e": 8 }
+        ],
+        "strategy": "finish"
+      }
+    },
+    {
+      "algo": "sort",
+      "count": 19,
+      "method": "POST",
+      "path": "/api/algorithms/sort/run",
+      "body": { "algorithm": "bubble", "values": [5, 3, 1, 4, 2] }
+    }
+  ],
+  "errors": {
+    "_comment": "빈 body라 SortRunRequest의 @NotNull이 400을 낸다. 핸들러는 이미 매핑된 뒤라 uri 라벨은 /api/algorithms/sort/run 이고, 따라서 알고리즘 필터에도 잡힌다.",
+    "count": 9,
+    "method": "POST",
+    "path": "/api/algorithms/sort/run",
+    "body": {},
+    "expectStatus": 400,
+    "countsAsAlgorithm": true
+  },
+  "beacons": {
+    "_comment": "routes는 KnownRoutes에 있는 값만 쓴다. cid는 고정 UUID라 같은 날 재시드해도 UV가 늘지 않는다.",
+    "count": 61,
+    "distinctCids": 7,
+    "routes": ["/", "/fractal", "/sorting", "/bezier"],
+    "path": "/api/telemetry/pv",
+    "expectStatus": 204,
+    "cidPrefix": "00000000-0000-4000-8000-"
+  }
+}

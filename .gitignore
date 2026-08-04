@@ -56,3 +56,6 @@ allgomath_docker/monitoring/grafana/provisioning/dashboards/temp/
 .env
 **/.env
 !**/.env.example
+
+# monitoring verify output
+allgomath_docker/monitoring/verify/out/
