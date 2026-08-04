@@ -83,7 +83,7 @@ jobs:
             df -h /
 
             # 허브 이미지를 받아 compose 빌드 이미지 이름으로 태깅 (compose 파일 수정 불필요)
-            docker pull ${{ env.DOCKER_USER }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+            docker pull ${{ env.DOCKER_USER }}/${{ env.DOCKER_IMAGE_NAME }}:latest || exit 1
             docker tag ${{ env.DOCKER_USER }}/${{ env.DOCKER_IMAGE_NAME }}:latest allgomath_docker-allgomath-api:latest
 
             if docker compose version >/dev/null 2>&1; then DC="docker compose"; else DC="docker-compose"; fi
