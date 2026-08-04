@@ -52,3 +52,7 @@ allgomath_docker/*.md
 # Grafana dashboard work-in-progress
 allgomath_docker/monitoring/grafana/provisioning/dashboards/*.json_new
 allgomath_docker/monitoring/grafana/provisioning/dashboards/temp/
+### secrets ###
+.env
+**/.env
+!**/.env.example

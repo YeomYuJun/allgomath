@@ -28,6 +28,10 @@ server:
 
 #임시 비활성화
 management:
+  # actuator 전용 포트. compose 가 게시하지 않아 도커 네트워크 안에서만 도달 가능하다.
+  server:
+    port: 9099
+
   health:
     redis:
       enabled: true

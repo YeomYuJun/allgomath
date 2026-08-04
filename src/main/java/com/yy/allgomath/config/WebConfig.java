@@ -1,8 +1,10 @@
 package com.yy.allgomath.config;
 
 import jakarta.annotation.PostConstruct;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -23,14 +25,31 @@ public class WebConfig {
         ImageIO.scanForPlugins();
     }
 
+    /**
+     * 관리 포트(9099) 전용 체인. 없으면 아래 체인의 authenticated() 가 걸려 Prometheus 스크레이프가 403 이 된다.
+     * 이 포트는 도커 네트워크 내부에서만 도달 가능해 네트워크 경계로 보호한다.
+     */
     @Bean
+    @Order(1)
+    public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher(EndpointRequest.toAnyEndpoint())
+                .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
+                .csrf(csrf -> csrf.disable());
+
+        return http.build();
+    }
+
+    @Bean
+    @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/**").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()  // Actuator 추가
+                        // actuator 본체는 9099 로 분리됨. 여기 허용 대상은 HealthPingController 뿐이다.
+                        .requestMatchers("/actuator/health").permitAll()
                         .anyRequest().authenticated()
                 );
 

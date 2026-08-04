@@ -22,10 +22,10 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  # Spring Boot 애플리케이션
+  # Spring Boot 애플리케이션. actuator 는 관리 포트 9099 에 있다.
   - job_name: 'allgomath-api'
     static_configs:
-      - targets: ['allgomath-api:8080']
+      - targets: ['allgomath-api:9099']
     metrics_path: '/actuator/prometheus'
     scrape_interval: 15s
     scrape_timeout: 10s
