@@ -11,7 +11,9 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
@@ -43,7 +45,8 @@ public class CacheConfig {
 
                 //일단 fractal 별 다른 TTL 적용
                 "mandelbrot", createCacheConfig(Duration.ofHours(2), serializer),    // zoom에 따른 많은 작용이 있을 거 같음
-                "julia", createCacheConfig(Duration.ofHours(2), serializer),         // 22
+                // NON_FINAL 기본 타이핑은 double[][]에 타입 id를 쓰지 않아 읽을 때 실패한다. 반환 타입을 고정해 왕복시킨다.
+                "julia", createCacheConfig(Duration.ofHours(2), typedSerializer(double[][].class)),
                 //"fractal", createCacheConfig(Duration.ofHours(1), serializer),       // 통합 캐시 -> 안쓸 거 같음
                 "mandelbrot_tile", createCacheConfig(Duration.ofHours(3), serializer),
 
@@ -57,8 +60,15 @@ public class CacheConfig {
                 .build();
     }
 
+    static <T> RedisSerializer<T> typedSerializer(Class<T> type) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        return new Jackson2JsonRedisSerializer<>(objectMapper, type);
+    }
+
     private RedisCacheConfiguration createCacheConfig(Duration ttl,
-                                                      GenericJackson2JsonRedisSerializer serializer) {
+                                                      RedisSerializer<?> serializer) {
         return RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(ttl)
                 .disableCachingNullValues()
