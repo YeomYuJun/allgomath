@@ -20,10 +20,18 @@ spring:
       time-to-live: 3600000  # 1시간
 
 server:
+  shutdown: graceful
   compression:
     enabled: true                           # 압축 활성화
     min-response-size: 1024                # 1KB 이상 응답만 압축
     mime-types: application/json           # JSON 응답만 압축
+  tomcat:
+    threads:
+      max: 50
+      min-spare: 10
+    accept-count: 50
+    max-connections: 200
+    connection-timeout: 5s
 
 
 #임시 비활성화
