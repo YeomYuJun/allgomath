@@ -3,6 +3,8 @@ package com.yy.allgomath.config;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.yy.allgomath.fourier.dto.FourierResult;
+import com.yy.allgomath.plotter.dto.SurfaceResult;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -54,8 +56,8 @@ public class CacheConfig {
                 "convex", createCacheConfig(Duration.ofMinutes(45), serializer),
 
                 // 순수함수 프리셋 엔드포인트: 입력 조합이 유한해 적중률이 높다
-                "plotter_surface", createCacheConfig(Duration.ofHours(1), serializer),
-                "fourier_series", createCacheConfig(Duration.ofHours(1), serializer)
+                "plotter_surface", createCacheConfig(Duration.ofHours(1), typedSerializer(SurfaceResult.class)),
+                "fourier_series", createCacheConfig(Duration.ofHours(1), typedSerializer(FourierResult.class))
         );
 
         return RedisCacheManager.builder(connectionFactory)
