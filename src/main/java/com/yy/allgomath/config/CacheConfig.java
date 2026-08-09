@@ -51,7 +51,11 @@ public class CacheConfig {
                 "mandelbrot_tile", createCacheConfig(Duration.ofHours(3), serializer),
 
                 "fft", createCacheConfig(Duration.ofMinutes(30), serializer),
-                "convex", createCacheConfig(Duration.ofMinutes(45), serializer)
+                "convex", createCacheConfig(Duration.ofMinutes(45), serializer),
+
+                // 순수함수 프리셋 엔드포인트: 입력 조합이 유한해 적중률이 높다
+                "plotter_surface", createCacheConfig(Duration.ofHours(1), serializer),
+                "fourier_series", createCacheConfig(Duration.ofHours(1), serializer)
         );
 
         return RedisCacheManager.builder(connectionFactory)

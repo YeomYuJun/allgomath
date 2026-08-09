@@ -5,6 +5,7 @@ import com.yy.allgomath.fourier.dto.FourierParams;
 import com.yy.allgomath.fourier.dto.FourierResult;
 import com.yy.allgomath.fourier.dto.Harmonic;
 import com.yy.allgomath.simulation.Computer;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.List;
 public class FourierService implements Computer<FourierParams, FourierResult> {
 
     @Override
+    @Cacheable(value = "fourier_series", key = "#params.wave() + '_' + #params.N()")
     public FourierResult compute(FourierParams params) {
         int count = params.N();
         List<Harmonic> harmonics = new ArrayList<>(count);

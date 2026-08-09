@@ -6,6 +6,7 @@ import com.yy.allgomath.plotter.dto.DescentResult;
 import com.yy.allgomath.plotter.dto.GradPoint;
 import com.yy.allgomath.plotter.dto.SurfaceParams;
 import com.yy.allgomath.plotter.dto.SurfaceResult;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,6 +21,8 @@ public class PlotterService {
     private static final double COORD_ABS_MAX = 1e3;
     private static final int LINESEARCH_MAX_TRIES = 5;
 
+    @Cacheable(value = "plotter_surface",
+            key = "#params.fn() + '_' + #params.range() + '_' + #params.resolution()")
     public SurfaceResult surface(SurfaceParams params) {
         if (params.range() < 2 || params.range() > 12) {
             throw new InvalidParameterException("range는 2~12 사이여야 합니다.");
