@@ -14,6 +14,7 @@ import java.util.List;
 public class FlowService implements BatchSimulator<FlowParams, double[][]> {
 
     private static final int MAX_PARTICLES = 1500;
+    private static final int MAX_FRAMES = 60;
     private static final double K = 0.03;
     private static final double STEP = 0.6;
     private static final double TIME_STEP = 0.01;
@@ -35,7 +36,7 @@ public class FlowService implements BatchSimulator<FlowParams, double[][]> {
             out.add(deepCopy(cur));
             series[i] = time;
         }
-        return new SimulationResponse<>(out, series);
+        return SimulationResponse.capped(out, series, MAX_FRAMES);
     }
 
     /** 값-노이즈 [0,1): 격자 해시를 smoothstep 이중보간. */

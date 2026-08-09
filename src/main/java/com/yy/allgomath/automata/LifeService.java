@@ -13,6 +13,7 @@ import java.util.List;
 public class LifeService implements BatchSimulator<boolean[][], boolean[][]> {
 
     private static final int MAX_DIM = 120;
+    private static final int MAX_FRAMES = 60;
     private static final boolean[] DEFAULT_BIRTH = mask(3);
     private static final boolean[] DEFAULT_SURVIVE = mask(2, 3);
 
@@ -33,7 +34,7 @@ public class LifeService implements BatchSimulator<boolean[][], boolean[][]> {
             result.add(current);
             series[i] = population(current);
         }
-        return new SimulationResponse<>(result, series);
+        return SimulationResponse.capped(result, series, MAX_FRAMES);
     }
 
     public boolean[][] nextGeneration(boolean[][] grid) {

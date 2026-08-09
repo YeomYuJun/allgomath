@@ -77,6 +77,14 @@ class LifeServiceTest {
     }
 
     @Test
+    void frames_capped_and_series_lockstep_beyond_limit() {
+        boolean[][] g = grid(".....", ".XXX.", ".....");
+        var resp = svc.simulate(g, 100);
+        assertTrue(resp.steps().size() <= 60, "프레임은 상한 이하");
+        assertEquals(resp.steps().size(), resp.series().length, "series는 프레임과 lockstep");
+    }
+
+    @Test
     void population_counts_alive_cells() {
         assertEquals(3, svc.population(grid(".XXX.")));
     }

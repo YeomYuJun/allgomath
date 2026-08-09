@@ -38,6 +38,35 @@ class FlowServiceTest {
     }
 
     @Test
+    void frames_capped_and_series_lockstep_beyond_limit() {
+        double[][] particles = {{10, 10}, {20, 20}};
+        var r = svc.simulate(new FlowParams(particles, 1.4, 0.0), 200);
+        assertTrue(r.steps().size() <= 60, "프레임은 상한 이하");
+        assertEquals(r.steps().size(), r.series().length, "series는 프레임과 lockstep");
+    }
+
+    @Test
+    void capped_preserves_final_state() {
+        var frames = svc.simulate(new FlowParams(new double[][]{{33, 44}}, 1.4, 0.0), 200).steps();
+        double capped = frames.get(frames.size() - 1)[0][0];
+        // 마지막 프레임은 200 step 전진한 최종 상태여야 한다(캡 없이 200번째와 동일)
+        double full = fullRun(new double[][]{{33, 44}}, 1.4, 0.0, 200);
+        assertEquals(full, capped, 1e-9);
+    }
+
+    private double fullRun(double[][] particles, double scale, double time, int steps) {
+        double t = time;
+        double[] p = particles[0];
+        for (int i = 0; i < steps; i++) {
+            double a = FlowService.noise(p[0] * 0.03 * scale, p[1] * 0.03 * scale) * 2 * Math.PI + t;
+            p[0] += Math.cos(a) * 0.6;
+            p[1] += Math.sin(a) * 0.6;
+            t += 0.01;
+        }
+        return p[0];
+    }
+
+    @Test
     void deterministic_for_same_input() {
         double a = svc.simulate(new FlowParams(new double[][]{{33, 44}}, 1.4, 0.5), 20).steps().get(19)[0][0];
         double b = svc.simulate(new FlowParams(new double[][]{{33, 44}}, 1.4, 0.5), 20).steps().get(19)[0][0];
