@@ -1,8 +1,19 @@
 package com.yy.allgomath.montecarlo.dto;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 public class MonteCarloRequest {
+    @Min(1)
+    @Max(1_000_000)
     private int iterations;
+
+    @NotNull
     private Bounds bounds;
+
+    @NotBlank
     private String functionType;
 
     public static class Bounds {

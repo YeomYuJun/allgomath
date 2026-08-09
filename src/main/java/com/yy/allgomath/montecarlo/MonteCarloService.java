@@ -9,12 +9,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class MonteCarloService {
 
-    private final Random random = new Random();
+    // 응답에 담는 시각화 포인트 상한. 추정 정확도는 전 반복으로 유지하고 포인트만 균등 샘플링한다.
+    public static final int MAX_POINTS = 5000;
 
     public MonteCarloResult performMonteCarloIntegration(MonteCarloRequest request) {
         MathFunction function = MathFunctionFactory.createFunction(request.getFunctionType());
@@ -30,10 +31,12 @@ public class MonteCarloService {
         double area = (xMax - xMin) * (yMax - yMin);
         int insideCount = 0;
         double sum = 0.0;
+        int pointStride = Math.max(1, request.getIterations() / MAX_POINTS);
 
         for (int i = 0; i < request.getIterations(); i++) {
-            double x = xMin + random.nextDouble() * (xMax - xMin);
-            double y = yMin + random.nextDouble() * (yMax - yMin);
+            double x = xMin + ThreadLocalRandom.current().nextDouble() * (xMax - xMin);
+            double y = yMin + ThreadLocalRandom.current().nextDouble() * (yMax - yMin);
+            boolean samplePoint = (i % pointStride == 0);
 
             try {
                 double functionValue = function.evaluate(x, y);
@@ -46,7 +49,9 @@ public class MonteCarloService {
                     }
                 }
 
-                points.add(new MonteCarloPoint(x, y, functionValue, inside));
+                if (samplePoint) {
+                    points.add(new MonteCarloPoint(x, y, functionValue, inside));
+                }
 
                 if ((i + 1) % 10 == 0) {
                     double currentEstimate = ((double) insideCount / (i + 1)) * area;
@@ -54,7 +59,9 @@ public class MonteCarloService {
                 }
 
             } catch (Exception e) {
-                points.add(new MonteCarloPoint(x, y, Double.NaN, false));
+                if (samplePoint) {
+                    points.add(new MonteCarloPoint(x, y, Double.NaN, false));
+                }
 
                 if ((i + 1) % 10 == 0) {
                     double currentEstimate = ((double) insideCount / (i + 1)) * area;

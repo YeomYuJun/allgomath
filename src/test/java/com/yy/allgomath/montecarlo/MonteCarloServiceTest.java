@@ -20,10 +20,23 @@ class MonteCarloServiceTest {
 
         MonteCarloResult result = service.performMonteCarloIntegration(req);
 
+        // 추정 정확도는 전 반복으로 유지하되 응답 포인트는 상한으로 캡한다
         assertEquals(200_000, result.getTotalCount());
-        assertEquals(200_000, result.getPoints().size());
+        assertTrue(result.getPoints().size() <= MonteCarloService.MAX_POINTS);
         assertEquals(Math.PI, result.getActualValue(), 1e-9);
         assertEquals(Math.PI, result.getEstimate(), 0.15);
+    }
+
+    @Test
+    void pointsNotDownsampledBelowCap() {
+        MonteCarloRequest req = new MonteCarloRequest(
+                3000,
+                new MonteCarloRequest.Bounds(-1.0, 1.0, -1.0, 1.0),
+                "unit_circle");
+
+        MonteCarloResult result = service.performMonteCarloIntegration(req);
+
+        assertEquals(3000, result.getPoints().size());
     }
 
     @Test

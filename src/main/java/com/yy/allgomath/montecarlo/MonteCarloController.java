@@ -2,6 +2,7 @@ package com.yy.allgomath.montecarlo;
 
 import com.yy.allgomath.montecarlo.dto.MonteCarloRequest;
 import com.yy.allgomath.montecarlo.dto.MonteCarloResult;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +15,7 @@ public class MonteCarloController {
     private MonteCarloService monteCarloService;
 
     @PostMapping("/integrate")
-    public ResponseEntity<MonteCarloResult> integrate(@RequestBody MonteCarloRequest request) {
+    public ResponseEntity<MonteCarloResult> integrate(@Valid @RequestBody MonteCarloRequest request) {
         MonteCarloResult result = monteCarloService.performMonteCarloIntegration(request);
         return ResponseEntity.ok(result);
     }
