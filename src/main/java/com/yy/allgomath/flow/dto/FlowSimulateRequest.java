@@ -5,9 +5,10 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public record FlowSimulateRequest(
-        @NotNull double[][] particles,
+        @NotNull @Size(max = 1500) double[][] particles,
         @DecimalMin("0.4") @DecimalMax("4.0") double scale,
         double time,
         @Min(1) @Max(200) int steps) {
